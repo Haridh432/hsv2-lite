@@ -1,0 +1,240 @@
+09-14 20:42:22.656 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.83203125, distance=1.451, depthBox={left=330.1974, top=72.8239, right=515.0, bottom=413.20404}
+09-14 20:42:22.656 D/MediaPipeLiveTest(15695): RESULT: class=bed, score=0.5234375, distance=3.092, depthBox={left=0.0, top=0.0, right=415.04675, bottom=477.60956}
+09-14 20:42:22.659 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=51.5 ms, E2E=103.2 ms, E2E p50=102.3 ms, p95=109.1 ms, p99=120.0 ms, samples=21
+09-14 20:42:22.780 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.80078125, distance=1.462, depthBox={left=320.96057, top=74.90849, right=513.0, bottom=408.0027}
+09-14 20:42:22.780 D/MediaPipeLiveTest(15695): RESULT: class=bed, score=0.36328125, distance=3.116, depthBox={left=0.0, top=0.0, right=398.81226, bottom=477.61304}
+09-14 20:42:22.780 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.3203125, distance=1.817, depthBox={left=65.290405, top=299.89313, right=334.63794, bottom=474.30142}
+09-14 20:42:22.783 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=44.4 ms, E2E=103.0 ms, E2E p50=103.0 ms, p95=109.1 ms, p99=120.0 ms, samples=22
+09-14 20:42:22.910 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.73828125, distance=1.463, depthBox={left=317.88464, top=86.5211, right=501.0, bottom=426.61728}
+09-14 20:42:22.910 D/MediaPipeLiveTest(15695): RESULT: class=bed, score=0.453125, distance=3.251, depthBox={left=0.0, top=0.0, right=449.0, bottom=474.32785}
+09-14 20:42:22.910 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.3203125, distance=1.8845, depthBox={left=179.68958, top=356.59717, right=263.2157, bottom=425.58115}
+09-14 20:42:22.910 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.30078125, distance=1.772, depthBox={left=152.56836, top=309.11218, right=348.80933, bottom=439.19904}
+09-14 20:42:22.912 I/flutter (15695): Live MediaPipe: detections=4, MediaPipe CPU latency=43.6 ms, E2E=108.4 ms, E2E p50=103.0 ms, p95=109.1 ms, p99=120.0 ms, samples=23
+09-14 20:42:23.484 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.71875, distance=1.478, depthBox={left=225.51166, top=99.57005, right=400.7976, bottom=438.81174}
+09-14 20:42:23.484 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4765625, distance=1.369, depthBox={left=24.40767, top=239.63216, right=223.5263, bottom=462.89227}
+09-14 20:42:23.487 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=43.0 ms, E2E=91.6 ms, E2E p50=102.3 ms, p95=109.1 ms, p99=120.0 ms, samples=28
+09-14 20:42:23.616 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.75390625, distance=1.494, depthBox={left=255.574, top=155.20807, right=446.0, bottom=457.74805}
+09-14 20:42:23.616 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.5, distance=1.178, depthBox={left=133.62137, top=295.98303, right=240.72253, bottom=369.75818}
+09-14 20:42:23.616 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.30078125, distance=3.57, depthBox={left=0.0, top=0.0, right=568.0, bottom=470.38904}
+09-14 20:42:23.616 D/MediaPipeLiveTest(15695): RESULT: class=remote, score=0.30078125, distance=1.759, depthBox={left=388.0752, top=238.48073, right=458.0, bottom=284.67035}
+09-14 20:42:23.618 I/flutter (15695): Live MediaPipe: detections=4, MediaPipe CPU latency=41.5 ms, E2E=108.0 ms, E2E p50=102.3 ms, p95=109.1 ms, p99=120.0 ms, samples=29
+09-14 20:42:23.728 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.71875, distance=1.419, depthBox={left=397.59735, top=163.54736, right=639.0, bottom=473.1922}
+09-14 20:42:23.728 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.5703125, distance=1.272, depthBox={left=268.96518, top=300.92258, right=377.02026, bottom=376.18903}
+09-14 20:42:23.730 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=44.0 ms, E2E=90.6 ms, E2E p50=102.3 ms, p95=109.1 ms, p99=120.0 ms, samples=30
+09-14 20:42:23.837 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.63671875, distance=1.341, depthBox={left=438.0, top=172.88301, right=639.0, bottom=476.49475}
+09-14 20:42:23.837 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.5, distance=1.247, depthBox={left=282.2331, top=305.0591, right=417.1125, bottom=402.21774}
+09-14 20:42:23.840 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=41.9 ms, E2E=87.8 ms, E2E p50=101.4 ms, p95=109.1 ms, p99=120.0 ms, samples=31
+09-14 20:42:23.958 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.84375, distance=3.591, depthBox={left=0.0, top=0.0, right=639.0, bottom=479.0}
+09-14 20:42:23.958 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.3203125, distance=1.189, depthBox={left=165.98608, top=323.60522, right=410.64087, bottom=475.50854}
+09-14 20:42:23.961 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.2 ms, E2E=99.9 ms, E2E p50=101.4 ms, p95=109.1 ms, p99=120.0 ms, samples=32
+09-14 20:42:24.538 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.88671875, distance=1.471, depthBox={left=322.0188, top=233.24734, right=542.0, bottom=478.85815}
+09-14 20:42:24.538 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4296875, distance=0.904, depthBox={left=22.196716, top=406.2031, right=311.48285, bottom=474.0809}
+09-14 20:42:24.539 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.163, depthBox={left=176.17596, top=355.39276, right=327.9865, bottom=460.93478}
+09-14 20:42:24.542 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=40.5 ms, E2E=94.3 ms, E2E p50=100.6 ms, p95=110.1 ms, p99=120.0 ms, samples=37
+09-14 20:42:24.663 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.87890625, distance=1.451, depthBox={left=324.0542, top=233.25107, right=540.0, bottom=478.85767}
+09-14 20:42:24.663 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4765625, distance=1.135, depthBox={left=169.98889, top=351.26572, right=317.96613, bottom=474.4648}
+09-14 20:42:24.663 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.30078125, distance=0.908, depthBox={left=24.886826, top=407.33545, right=281.69574, bottom=476.22925}
+09-14 20:42:24.663 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.30078125, distance=1.53, depthBox={left=528.0, top=332.41125, right=605.0, bottom=478.8513}
+09-14 20:42:24.666 I/flutter (15695): Live MediaPipe: detections=4, MediaPipe CPU latency=43.2 ms, E2E=103.1 ms, E2E p50=101.1 ms, p95=110.1 ms, p99=120.0 ms, samples=38
+09-14 20:42:24.779 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.84375, distance=1.462, depthBox={left=319.9815, top=222.91463, right=544.0, bottom=477.8226}
+09-14 20:42:24.779 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.453125, distance=1.1185, depthBox={left=78.69513, top=350.2309, right=324.14758, bottom=476.42783}
+09-14 20:42:24.779 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.453125, distance=1.538, depthBox={left=519.0, top=318.90582, right=606.0, bottom=473.64417}
+09-14 20:42:24.782 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.2 ms, E2E=94.6 ms, E2E p50=100.6 ms, p95=110.1 ms, p99=120.0 ms, samples=39
+09-14 20:42:24.895 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.85546875, distance=1.455, depthBox={left=332.17798, top=220.8606, right=539.0, bottom=479.0}
+09-14 20:42:24.895 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4296875, distance=1.122, depthBox={left=80.77536, top=345.07736, right=321.05664, bottom=475.4091}
+09-14 20:42:24.895 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.3203125, distance=1.548, depthBox={left=512.0, top=315.77716, right=598.0, bottom=476.746}
+09-14 20:42:24.897 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.1 ms, E2E=94.2 ms, E2E p50=100.6 ms, p95=110.1 ms, p99=120.0 ms, samples=40
+09-14 20:42:25.582 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.83203125, distance=1.471, depthBox={left=310.8056, top=233.2942, right=506.0, bottom=478.8074}
+09-14 20:42:25.582 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.4296875, distance=1.149, depthBox={left=156.46701, top=361.6332, right=300.198, bottom=464.10492}
+09-14 20:42:25.586 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.2 ms, E2E=88.7 ms, E2E p50=98.7 ms, p95=109.1 ms, p99=120.0 ms, samples=46
+09-14 20:42:25.693 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.85546875, distance=1.469, depthBox={left=314.8769, top=233.29817, right=503.0, bottom=478.79874}
+09-14 20:42:25.693 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.36328125, distance=1.146, depthBox={left=154.40543, top=359.56665, right=300.19354, bottom=469.29984}
+09-14 20:42:25.695 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.4 ms, E2E=88.6 ms, E2E p50=98.3 ms, p95=109.1 ms, p99=120.0 ms, samples=47
+09-14 20:42:25.805 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.84375, distance=1.471, depthBox={left=314.8769, top=233.29817, right=503.0, bottom=478.79874}
+09-14 20:42:25.805 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.38671875, distance=1.14, depthBox={left=153.34683, top=363.69553, right=302.25153, bottom=471.38126}
+09-14 20:42:25.809 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=44.3 ms, E2E=92.3 ms, E2E p50=98.3 ms, p95=109.1 ms, p99=120.0 ms, samples=48
+09-14 20:42:25.917 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.87890625, distance=1.465, depthBox={left=311.87897, top=233.28891, right=510.0, bottom=478.81818}
+09-14 20:42:25.917 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4765625, distance=1.121, depthBox={left=19.685226, top=362.6447, right=301.48816, bottom=479.0}
+09-14 20:42:25.920 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.5 ms, E2E=88.9 ms, E2E p50=97.1 ms, p95=109.1 ms, p99=120.0 ms, samples=49
+09-14 20:42:26.033 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.85546875, distance=1.462, depthBox={left=311.84125, top=233.2876, right=511.0, bottom=478.8207}
+09-14 20:42:26.033 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.40625, distance=1.157, depthBox={left=160.62845, top=358.51978, right=306.3775, bottom=458.90118}
+09-14 20:42:26.033 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.3203125, distance=1.564, depthBox={left=505.0, top=324.01074, right=577.0, bottom=475.71475}
+09-14 20:42:26.037 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.8 ms, E2E=95.7 ms, E2E p50=97.1 ms, p95=109.1 ms, p99=120.0 ms, samples=50
+09-14 20:42:26.490 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.8671875, distance=1.46, depthBox={left=325.05377, top=230.19316, right=514.0, bottom=479.0}
+09-14 20:42:26.490 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.453125, distance=1.159, depthBox={left=165.83017, top=354.38004, right=308.52368, bottom=455.76587}
+09-14 20:42:26.493 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=43.0 ms, E2E=89.3 ms, E2E p50=96.3 ms, p95=109.1 ms, p99=120.0 ms, samples=54
+09-14 20:42:26.601 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.84375, distance=1.444, depthBox={left=325.0542, top=233.28494, right=514.0, bottom=478.82428}
+09-14 20:42:26.601 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.453125, distance=1.158, depthBox={left=167.8899, top=356.4447, right=307.52417, bottom=454.71854}
+09-14 20:42:26.605 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.8 ms, E2E=91.0 ms, E2E p50=95.9 ms, p95=109.1 ms, p99=120.0 ms, samples=55
+09-14 20:42:26.712 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.85546875, distance=1.456, depthBox={left=323.0183, top=230.19157, right=514.0, bottom=479.0}
+09-14 20:42:26.712 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.40625, distance=1.158, depthBox={left=166.85443, top=356.43817, right=307.63892, bottom=454.7225}
+09-14 20:42:26.716 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.5 ms, E2E=89.7 ms, E2E p50=95.9 ms, p95=109.1 ms, p99=120.0 ms, samples=56
+09-14 20:42:26.825 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.87890625, distance=1.451, depthBox={left=320.9834, top=233.29024, right=509.0, bottom=478.81555}
+09-14 20:42:26.825 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4296875, distance=1.157, depthBox={left=165.81885, top=356.4397, right=312.60907, bottom=459.92303}
+09-14 20:42:26.828 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=43.3 ms, E2E=90.5 ms, E2E p50=95.7 ms, p95=109.1 ms, p99=120.0 ms, samples=57
+09-14 20:42:26.934 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.83203125, distance=1.456, depthBox={left=324.0542, top=233.2942, right=506.0, bottom=478.8074}
+09-14 20:42:26.934 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.40625, distance=1.157, depthBox={left=164.78317, top=356.4413, right=312.58093, bottom=456.80893}
+09-14 20:42:26.939 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=41.7 ms, E2E=90.1 ms, E2E p50=95.7 ms, p95=109.1 ms, p99=120.0 ms, samples=58
+09-14 20:42:27.514 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.85546875, distance=1.476, depthBox={left=318.94794, top=233.31474, right=489.0, bottom=478.7613}
+09-14 20:42:27.514 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.38671875, distance=1.158, depthBox={left=165.81317, top=357.4723, right=311.60907, bottom=459.92303}
+09-14 20:42:27.514 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.34375, distance=1.55, depthBox={left=509.0, top=329.21616, right=586.0, bottom=475.70444}
+09-14 20:42:27.517 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.3 ms, E2E=94.1 ms, E2E p50=95.5 ms, p95=108.4 ms, p99=120.0 ms, samples=63
+09-14 20:42:27.632 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.83203125, distance=1.48, depthBox={left=323.0183, top=230.22226, right=494.0, bottom=479.0}
+09-14 20:42:27.632 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.38671875, distance=1.158, depthBox={left=160.64526, top=355.41055, right=312.55176, bottom=457.8623}
+09-14 20:42:27.632 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.30078125, distance=1.562, depthBox={left=507.0, top=331.27383, right=578.0, bottom=474.66605}
+09-14 20:42:27.634 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.3 ms, E2E=96.0 ms, E2E p50=95.7 ms, p95=108.4 ms, p99=120.0 ms, samples=64
+09-14 20:42:27.741 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.83203125, distance=1.478, depthBox={left=318.94794, top=233.31474, right=490.0, bottom=478.7602}
+09-14 20:42:27.741 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.38671875, distance=1.159, depthBox={left=159.60358, top=356.4413, right=312.58008, bottom=459.9424}
+09-14 20:42:27.743 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.1 ms, E2E=88.3 ms, E2E p50=95.5 ms, p95=108.4 ms, p99=120.0 ms, samples=65
+09-14 20:42:27.848 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.83203125, distance=1.478, depthBox={left=320.9834, top=233.30821, right=495.0, bottom=478.77762}
+09-14 20:42:27.848 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.453125, distance=1.158, depthBox={left=160.63406, top=357.47556, right=312.5511, bottom=459.93918}
+09-14 20:42:27.848 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.34375, distance=1.556, depthBox={left=512.0, top=316.80948, right=585.0, bottom=474.6684}
+09-14 20:42:27.851 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=36.1 ms, E2E=87.0 ms, E2E p50=95.5 ms, p95=108.4 ms, p99=120.0 ms, samples=66
+09-14 20:42:27.956 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.85546875, distance=1.48, depthBox={left=319.9828, top=230.2207, right=495.0, bottom=479.0}
+09-14 20:42:27.956 D/MediaPipeLiveTest(15695): RESULT: class=tv, score=0.4296875, distance=1.163, depthBox={left=167.87845, top=358.51007, right=313.52417, bottom=454.71854}
+09-14 20:42:27.958 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=40.9 ms, E2E=86.4 ms, E2E p50=95.5 ms, p95=108.4 ms, p99=120.0 ms, samples=67
+09-14 20:42:28.512 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.84375, distance=1.483, depthBox={left=327.08875, top=225.07436, right=495.0, bottom=475.6575}
+09-14 20:42:28.512 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4296875, distance=1.131, depthBox={left=159.61469, top=354.37668, right=304.57837, bottom=471.37375}
+09-14 20:42:28.515 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=41.8 ms, E2E=88.0 ms, E2E p50=94.6 ms, p95=108.4 ms, p99=120.0 ms, samples=72
+09-14 20:42:28.623 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.84375, distance=1.476, depthBox={left=327.0893, top=230.2207, right=495.0, bottom=479.0}
+09-14 20:42:28.623 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.453125, distance=1.15, depthBox={left=162.72842, top=353.34802, right=302.5196, bottom=468.252}
+09-14 20:42:28.626 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.4 ms, E2E=90.0 ms, E2E p50=94.5 ms, p95=108.4 ms, p99=120.0 ms, samples=73
+09-14 20:42:28.732 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.84375, distance=1.48, depthBox={left=328.10657, top=225.05965, right=502.0, bottom=475.68158}
+09-14 20:42:28.732 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4765625, distance=1.1415, depthBox={left=162.73395, top=352.30823, right=307.66718, bottom=469.29037}
+09-14 20:42:28.735 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=41.8 ms, E2E=87.7 ms, E2E p50=94.5 ms, p95=108.4 ms, p99=120.0 ms, samples=74
+09-14 20:42:28.841 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.85546875, distance=1.478, depthBox={left=328.10657, top=225.06047, right=502.0, bottom=475.68158}
+09-14 20:42:28.841 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.148, depthBox={left=163.77542, top=351.27795, right=306.63763, bottom=470.32617}
+09-14 20:42:28.844 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.5 ms, E2E=87.8 ms, E2E p50=94.4 ms, p95=108.4 ms, p99=120.0 ms, samples=75
+09-14 20:42:28.957 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.8671875, distance=1.476, depthBox={left=332.17804, top=222.9976, right=502.0, bottom=477.76483}
+09-14 20:42:28.957 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4765625, distance=1.135, depthBox={left=153.41785, top=350.24954, right=304.57874, bottom=467.23138}
+09-14 20:42:28.957 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.3203125, distance=1.538, depthBox={left=511.0, top=318.8866, right=589.0, bottom=476.74854}
+09-14 20:42:28.961 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.1 ms, E2E=95.4 ms, E2E p50=94.5 ms, p95=108.4 ms, p99=120.0 ms, samples=76
+09-14 20:42:29.510 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.88671875, distance=1.476, depthBox={left=331.1601, top=222.99327, right=505.0, bottom=477.7696}
+09-14 20:42:29.510 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.453125, distance=1.153, depthBox={left=167.90689, top=353.34802, right=302.5196, bottom=468.23804}
+09-14 20:42:29.510 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.38671875, distance=1.538, depthBox={left=510.0, top=320.94897, right=590.0, bottom=478.79086}
+09-14 20:42:29.513 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.0 ms, E2E=94.0 ms, E2E p50=94.3 ms, p95=108.0 ms, p99=120.0 ms, samples=81
+09-14 20:42:29.621 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.84375, distance=1.474, depthBox={left=328.10657, top=225.05965, right=500.0, bottom=475.684}
+09-14 20:42:29.621 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.453125, distance=1.137, depthBox={left=163.76984, top=352.31976, right=300.4591, bottom=473.44077}
+09-14 20:42:29.624 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=43.4 ms, E2E=90.5 ms, E2E p50=94.3 ms, p95=108.0 ms, p99=120.0 ms, samples=82
+09-14 20:42:29.733 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.87890625, distance=1.474, depthBox={left=333.2141, top=217.84941, right=498.0, bottom=472.5672}
+09-14 20:42:29.733 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.5234375, distance=1.12, depthBox={left=88.025085, top=347.1529, right=306.63873, bottom=479.0}
+09-14 20:42:29.736 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=43.3 ms, E2E=89.7 ms, E2E p50=94.3 ms, p95=108.0 ms, p99=120.0 ms, samples=83
+09-14 20:42:29.842 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.89453125, distance=1.469, depthBox={left=333.21454, top=212.71591, right=492.0, bottom=477.74576}
+09-14 20:42:29.842 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.5234375, distance=1.104, depthBox={left=77.67642, top=339.93668, right=309.72906, bottom=479.0}
+09-14 20:42:29.845 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=41.6 ms, E2E=87.7 ms, E2E p50=94.3 ms, p95=108.0 ms, p99=120.0 ms, samples=84
+09-14 20:42:29.954 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.8671875, distance=1.472, depthBox={left=334.2165, top=200.35329, right=492.0, bottom=479.0}
+09-14 20:42:29.954 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.5, distance=1.12, depthBox={left=85.9834, top=332.7339, right=308.69812, bottom=476.4694}
+09-14 20:42:29.957 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.8 ms, E2E=90.5 ms, E2E p50=94.2 ms, p95=108.0 ms, p99=120.0 ms, samples=85
+09-14 20:42:30.505 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.83203125, distance=1.455, depthBox={left=388.29907, top=192.87051, right=556.0, bottom=478.85352}
+09-14 20:42:30.505 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.546875, distance=1.158, depthBox={left=172.16074, top=331.7201, right=369.3095, bottom=478.60834}
+09-14 20:42:30.508 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=40.8 ms, E2E=86.7 ms, E2E p50=94.1 ms, p95=108.0 ms, p99=120.0 ms, samples=90
+09-14 20:42:30.615 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.88671875, distance=1.456, depthBox={left=396.5114, top=192.88329, right=553.0, bottom=478.8579}
+09-14 20:42:30.616 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.5703125, distance=1.17, depthBox={left=145.23807, top=325.58813, right=380.23444, bottom=477.61343}
+09-14 20:42:30.619 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.1 ms, E2E=90.0 ms, E2E p50=94.0 ms, p95=108.0 ms, p99=120.0 ms, samples=91
+09-14 20:42:30.727 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.85546875, distance=1.485, depthBox={left=391.4143, top=183.59637, right=546.0, bottom=469.54544}
+09-14 20:42:30.727 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.5234375, distance=1.1915, depthBox={left=254.62177, top=313.25742, right=385.82135, bottom=464.7817}
+09-14 20:42:30.733 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.2 ms, E2E=92.0 ms, E2E p50=94.0 ms, p95=108.0 ms, p99=120.0 ms, samples=92
+09-14 20:42:30.846 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.80078125, distance=1.513, depthBox={left=386.2895, top=186.71492, right=542.0, bottom=472.65424}
+09-14 20:42:30.846 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4765625, distance=1.202, depthBox={left=255.66522, top=305.03677, right=385.62653, bottom=462.68903}
+09-14 20:42:30.846 D/MediaPipeLiveTest(15695): RESULT: class=couch, score=0.3203125, distance=1.922, depthBox={left=144.95819, top=382.34357, right=380.4585, bottom=476.5775}
+09-14 20:42:30.849 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.7 ms, E2E=94.9 ms, E2E p50=94.0 ms, p95=108.0 ms, p99=120.0 ms, samples=93
+09-14 20:42:30.957 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.73828125, distance=1.534, depthBox={left=380.1375, top=195.06213, right=525.0, bottom=475.74866}
+09-14 20:42:30.957 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4765625, distance=1.198, depthBox={left=251.56363, top=308.1122, right=384.6195, bottom=468.96936}
+09-14 20:42:30.960 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=43.0 ms, E2E=90.3 ms, E2E p50=94.0 ms, p95=108.0 ms, p99=120.0 ms, samples=94
+09-14 20:42:31.507 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.76953125, distance=1.673, depthBox={left=356.65814, top=195.19173, right=493.0, bottom=479.0}
+09-14 20:42:31.507 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4296875, distance=1.202, depthBox={left=241.32974, top=304.00015, right=383.45648, bottom=450.21594}
+09-14 20:42:31.510 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=39.9 ms, E2E=86.3 ms, E2E p50=92.5 ms, p95=108.0 ms, p99=120.0 ms, samples=99
+09-14 20:42:31.615 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.75390625, distance=1.678, depthBox={left=355.63257, top=201.40753, right=485.0, bottom=476.6849}
+09-14 20:42:31.615 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.38671875, distance=1.198, depthBox={left=237.22266, top=306.04117, right=370.81384, bottom=466.93344}
+09-14 20:42:31.617 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=40.2 ms, E2E=86.4 ms, E2E p50=92.5 ms, p95=108.0 ms, p99=120.0 ms, samples=100
+09-14 20:42:31.730 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.69921875, distance=1.706, depthBox={left=336.2696, top=210.74915, right=459.0, bottom=479.0}
+09-14 20:42:31.731 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.3203125, distance=1.828, depthBox={left=145.29279, top=403.0544, right=337.03027, bottom=479.0}
+09-14 20:42:31.731 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.30078125, distance=1.234, depthBox={left=229.01266, top=306.0256, right=358.57184, bottom=392.9868}
+09-14 20:42:31.733 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=40.9 ms, E2E=94.1 ms, E2E p50=92.5 ms, p95=107.5 ms, p99=110.1 ms, samples=101
+09-14 20:42:31.838 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.65625, distance=1.697, depthBox={left=334.23273, top=212.79588, right=463.0, bottom=477.64008}
+09-14 20:42:31.838 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.36328125, distance=1.754, depthBox={left=133.70416, top=351.25586, right=346.3222, bottom=474.5029}
+09-14 20:42:31.841 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=40.1 ms, E2E=86.2 ms, E2E p50=92.5 ms, p95=107.5 ms, p99=110.1 ms, samples=102
+09-14 20:42:31.949 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.546875, distance=1.728, depthBox={left=325.0697, top=211.82466, right=442.0, bottom=476.50647}
+09-14 20:42:31.949 D/MediaPipeLiveTest(15695): RESULT: class=laptop, score=0.5, distance=1.23, depthBox={left=208.43494, top=309.09854, right=347.34802, bottom=391.03888}
+09-14 20:42:31.952 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.7 ms, E2E=89.9 ms, E2E p50=92.3 ms, p95=107.5 ms, p99=110.1 ms, samples=103
+09-14 20:42:32.494 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.71875, distance=1.741, depthBox={left=318.96307, top=220.05232, right=432.0, bottom=474.37732}
+09-14 20:42:32.494 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.34375, distance=1.172, depthBox={left=133.78314, top=333.7434, right=334.1753, bottom=474.50833}
+09-14 20:42:32.497 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=38.0 ms, E2E=84.4 ms, E2E p50=91.8 ms, p95=107.5 ms, p99=110.1 ms, samples=108
+09-14 20:42:32.603 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.6796875, distance=1.746, depthBox={left=315.90936, top=220.05492, right=431.0, bottom=474.37253}
+09-14 20:42:32.603 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.3203125, distance=1.163, depthBox={left=140.05228, top=324.49118, right=335.1443, bottom=473.47272}
+09-14 20:42:32.605 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=40.8 ms, E2E=87.5 ms, E2E p50=91.6 ms, p95=107.5 ms, p99=110.1 ms, samples=109
+09-14 20:42:32.713 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.71875, distance=1.748, depthBox={left=316.9265, top=216.98122, right=430.0, bottom=471.23538}
+09-14 20:42:32.713 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.3203125, distance=1.178, depthBox={left=195.04413, top=306.02338, right=341.26013, bottom=446.27475}
+09-14 20:42:32.715 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.8 ms, E2E=88.4 ms, E2E p50=91.6 ms, p95=107.5 ms, p99=110.1 ms, samples=110
+09-14 20:42:32.828 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.65625, distance=1.743, depthBox={left=317.94446, top=216.974, right=433.0, bottom=471.25003}
+09-14 20:42:32.828 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.34375, distance=1.184, depthBox={left=197.11124, top=304.99924, right=337.20227, bottom=440.01364}
+09-14 20:42:32.828 D/MediaPipeLiveTest(15695): RESULT: class=laptop, score=0.30078125, distance=1.746, depthBox={left=77.62103, top=384.36084, right=329.84778, bottom=476.42938}
+09-14 20:42:32.831 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=40.5 ms, E2E=93.4 ms, E2E p50=91.6 ms, p95=107.5 ms, p99=110.1 ms, samples=111
+09-14 20:42:32.937 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.65625, distance=1.743, depthBox={left=317.94446, top=216.974, right=433.0, bottom=471.25003}
+09-14 20:42:32.937 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4296875, distance=1.182, depthBox={left=200.20166, top=306.02338, right=341.26013, bottom=452.49924}
+09-14 20:42:32.940 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.5 ms, E2E=88.0 ms, E2E p50=91.6 ms, p95=107.5 ms, p99=110.1 ms, samples=112
+09-14 20:42:33.585 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.71875, distance=1.728, depthBox={left=312.85455, top=216.974, right=433.0, bottom=471.25003}
+09-14 20:42:33.585 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.36328125, distance=1.188, depthBox={left=135.83215, top=339.91873, right=335.12286, bottom=475.5447}
+09-14 20:42:33.588 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=43.1 ms, E2E=88.9 ms, E2E p50=91.0 ms, p95=107.5 ms, p99=110.1 ms, samples=118
+09-14 20:42:33.687 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.69921875, distance=1.723, depthBox={left=312.85352, top=213.88733, right=437.0, bottom=468.1381}
+09-14 20:42:33.687 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.36328125, distance=1.167, depthBox={left=137.9628, top=327.57437, right=340.41827, bottom=476.58032}
+09-14 20:42:33.688 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=34.2 ms, E2E=79.5 ms, E2E p50=90.6 ms, p95=107.5 ms, p99=110.1 ms, samples=119
+09-14 20:42:33.793 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.71875, distance=1.721, depthBox={left=312.85352, top=213.88733, right=437.0, bottom=468.1381}
+09-14 20:42:33.793 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4296875, distance=1.184, depthBox={left=102.63226, top=318.3304, right=341.24982, bottom=476.53394}
+09-14 20:42:33.796 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=40.2 ms, E2E=86.2 ms, E2E p50=90.6 ms, p95=107.5 ms, p99=110.1 ms, samples=120
+09-14 20:42:33.906 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.65625, distance=1.716, depthBox={left=312.85168, top=208.7568, right=437.0, bottom=478.57568}
+09-14 20:42:33.906 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.174, depthBox={left=190.90396, top=309.09802, right=343.28162, bottom=476.48114}
+09-14 20:42:33.909 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.2 ms, E2E=88.5 ms, E2E p50=90.5 ms, p95=107.4 ms, p99=110.1 ms, samples=121
+09-14 20:42:34.008 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.6796875, distance=1.706, depthBox={left=312.85278, top=211.82199, right=443.0, bottom=476.5112}
+09-14 20:42:34.008 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.176, depthBox={left=185.71387, top=307.04828, right=344.41498, bottom=474.41992}
+09-14 20:42:34.011 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=33.4 ms, E2E=81.0 ms, E2E p50=90.5 ms, p95=107.4 ms, p99=110.1 ms, samples=122
+09-14 20:42:34.543 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.69921875, distance=1.704, depthBox={left=313.8911, top=219.02068, right=436.0, bottom=473.34695}
+09-14 20:42:34.543 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.17, depthBox={left=152.53192, top=318.33032, right=343.39282, bottom=479.0}
+09-14 20:42:34.545 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=34.6 ms, E2E=79.1 ms, E2E p50=90.4 ms, p95=107.4 ms, p99=110.1 ms, samples=127
+09-14 20:42:34.643 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.6796875, distance=1.706, depthBox={left=313.87158, top=213.88982, right=436.0, bottom=468.133}
+09-14 20:42:34.643 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.178, depthBox={left=185.72137, top=304.99857, right=343.41174, bottom=472.34006}
+09-14 20:42:34.645 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=34.4 ms, E2E=79.4 ms, E2E p50=90.4 ms, p95=107.4 ms, p99=110.1 ms, samples=128
+09-14 20:42:34.751 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.65625, distance=1.699, depthBox={left=313.87158, top=213.88982, right=437.0, bottom=468.13214}
+09-14 20:42:34.751 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.36328125, distance=1.176, depthBox={left=152.54037, top=316.27768, right=339.3897, bottom=477.60687}
+09-14 20:42:34.754 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=40.8 ms, E2E=87.0 ms, E2E p50=90.3 ms, p95=107.4 ms, p99=110.1 ms, samples=129
+09-14 20:42:34.862 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.69921875, distance=1.697, depthBox={left=317.9442, top=215.94844, right=432.0, bottom=470.20682}
+09-14 20:42:34.862 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.4296875, distance=1.185, depthBox={left=106.76721, top=325.51846, right=344.41986, bottom=477.5771}
+09-14 20:42:34.865 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=43.8 ms, E2E=89.8 ms, E2E p50=90.3 ms, p95=107.4 ms, p99=110.1 ms, samples=130
+09-14 20:42:34.978 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.65625, distance=1.697, depthBox={left=317.9442, top=215.93675, right=439.0, bottom=470.23013}
+09-14 20:42:34.978 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.181, depthBox={left=120.316956, top=324.49194, right=342.27466, bottom=479.0}
+09-14 20:42:34.978 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.30078125, distance=1.22, depthBox={left=212.55704, top=308.07297, right=346.42365, bottom=408.6495}
+09-14 20:42:34.981 I/flutter (15695): Live MediaPipe: detections=3, MediaPipe CPU latency=42.2 ms, E2E=94.6 ms, E2E p50=90.3 ms, p95=107.4 ms, p99=110.1 ms, samples=131
+09-14 20:42:35.528 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.59375, distance=1.699, depthBox={left=319.97943, top=211.82735, right=441.0, bottom=470.24017}
+09-14 20:42:35.528 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.453125, distance=1.184, depthBox={left=100.55414, top=318.3307, right=344.5088, bottom=476.5277}
+09-14 20:42:35.531 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=41.6 ms, E2E=88.3 ms, E2E p50=90.3 ms, p95=107.4 ms, p99=110.1 ms, samples=136
+09-14 20:42:35.639 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.61328125, distance=1.704, depthBox={left=319.9798, top=213.87978, right=440.0, bottom=468.15347}
+09-14 20:42:35.639 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.182, depthBox={left=106.84296, top=313.20078, right=346.34344, bottom=474.48486}
+09-14 20:42:35.641 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.9 ms, E2E=88.9 ms, E2E p50=90.1 ms, p95=107.4 ms, p99=110.1 ms, samples=137
+09-14 20:42:35.747 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.65625, distance=1.704, depthBox={left=319.9798, top=213.87978, right=440.0, bottom=468.15347}
+09-14 20:42:35.747 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.453125, distance=1.189, depthBox={left=93.29636, top=312.17477, right=342.44836, bottom=476.50342}
+09-14 20:42:35.750 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=41.1 ms, E2E=87.5 ms, E2E p50=90.1 ms, p95=107.4 ms, p99=110.1 ms, samples=138
+09-14 20:42:35.857 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.61328125, distance=1.699, depthBox={left=317.94446, top=216.95801, right=441.0, bottom=471.2839}
+09-14 20:42:35.857 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.40625, distance=1.185, depthBox={left=103.72751, top=312.17474, right=342.38812, bottom=476.53976}
+09-14 20:42:35.860 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=41.7 ms, E2E=87.9 ms, E2E p50=90.0 ms, p95=107.4 ms, p99=110.1 ms, samples=139
+09-14 20:42:35.968 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.63671875, distance=1.711, depthBox={left=315.90717, top=211.83266, right=439.0, bottom=470.23013}
+09-14 20:42:35.968 D/MediaPipeLiveTest(15695): RESULT: class=chair, score=0.453125, distance=1.183, depthBox={left=101.64609, top=313.20047, right=343.445, bottom=474.4714}
+09-14 20:42:35.972 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=42.9 ms, E2E=90.5 ms, E2E p50=90.1 ms, p95=107.4 ms, p99=110.1 ms, samples=140
+09-14 20:42:36.503 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.38671875, distance=1.657, depthBox={left=332.1634, top=185.9691, right=502.0, bottom=466.22916}
+09-14 20:42:36.504 I/flutter (15695): Live MediaPipe: detections=1, MediaPipe CPU latency=41.2 ms, E2E=79.5 ms, E2E p50=89.9 ms, p95=105.6 ms, p99=110.1 ms, samples=145
+09-14 20:42:36.612 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.5703125, distance=2.804, depthBox={left=158.7131, top=97.001015, right=242.13257, bottom=291.1375}
+09-14 20:42:36.612 D/MediaPipeLiveTest(15695): RESULT: class=person, score=0.5234375, distance=2.899, depthBox={left=0.0, top=0.0, right=429.0, bottom=393.02048}
+09-14 20:42:36.615 I/flutter (15695): Live MediaPipe: detections=2, MediaPipe CPU latency=40.9 ms, E2E=89.4 ms, E2E p50=89.9 ms, p95=105.6 ms, p99=110.1 ms, samples=146
+09-14 20:42:36.715 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=46.6 ms, E2E=78.8 ms, E2E p50=89.9 ms, p95=105.6 ms, p99=110.1 ms, samples=147
+09-14 20:42:36.819 D/MediaPipeLiveTest(15695): RESULT: class=cat, score=0.4765625, distance=0.556, depthBox={left=0.0, top=0.0, right=347.56226, bottom=469.61475}
+09-14 20:42:36.822 I/flutter (15695): Live MediaPipe: detections=1, MediaPipe CPU latency=42.9 ms, E2E=86.0 ms, E2E p50=89.9 ms, p95=105.6 ms, p99=110.1 ms, samples=148
+09-14 20:42:36.913 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=34.4 ms, E2E=66.7 ms, E2E p50=89.8 ms, p95=105.6 ms, p99=110.1 ms, samples=149
+09-14 20:42:37.008 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=42.2 ms, E2E=73.8 ms, E2E p50=89.8 ms, p95=105.6 ms, p99=110.1 ms, samples=150
+09-14 20:42:37.102 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=42.6 ms, E2E=73.0 ms, E2E p50=89.8 ms, p95=105.6 ms, p99=110.1 ms, samples=151
+09-14 20:42:37.521 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=45.0 ms, E2E=77.0 ms, E2E p50=89.7 ms, p95=105.6 ms, p99=110.1 ms, samples=155
+09-14 20:42:37.621 D/MediaPipeLiveTest(15695): RESULT: class=bed, score=0.30078125, distance=2.587, depthBox={left=0.0, top=0.0, right=639.0, bottom=479.0}
+09-14 20:42:37.623 I/flutter (15695): Live MediaPipe: detections=1, MediaPipe CPU latency=34.7 ms, E2E=81.3 ms, E2E p50=89.7 ms, p95=105.6 ms, p99=110.1 ms, samples=156
+09-14 20:42:37.721 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=45.5 ms, E2E=76.6 ms, E2E p50=89.7 ms, p95=105.6 ms, p99=110.1 ms, samples=157
+09-14 20:42:37.819 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=42.0 ms, E2E=76.4 ms, E2E p50=89.7 ms, p95=105.6 ms, p99=110.1 ms, samples=158
+09-14 20:42:37.912 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=40.1 ms, E2E=71.5 ms, E2E p50=89.7 ms, p95=105.6 ms, p99=110.1 ms, samples=159
+09-14 20:42:38.005 I/flutter (15695): Live MediaPipe: detections=0, MediaPipe CPU latency=39.9 ms, E2E=71.2 ms, E2E p50=89.7 ms, p95=105.6 ms, p99=110.1 ms, samples=160
+09-14 20:42:38.100 I/flutter (15

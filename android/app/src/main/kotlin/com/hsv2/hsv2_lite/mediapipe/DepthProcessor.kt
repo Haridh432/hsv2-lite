@@ -1,0 +1,88 @@
+package com.hsv2.hsv2_lite.mediapipe
+
+class DepthProcessor {
+
+    companion object {
+        private const val MIN_DEPTH_MM = 100
+        private const val MAX_DEPTH_MM = 10000
+    }
+
+    fun calculateMedianDepthMm(
+        depthData: ShortArray,
+        depthWidth: Int,
+        depthHeight: Int,
+        box: BoundingBox
+    ): Float? {
+
+        if (depthData.size < depthWidth * depthHeight) {
+            return null
+        }
+
+        val boxLeft = box.left.coerceIn(0f, depthWidth.toFloat())
+        val boxTop = box.top.coerceIn(0f, depthHeight.toFloat())
+        val boxRight = box.right.coerceIn(0f, depthWidth.toFloat())
+        val boxBottom = box.bottom.coerceIn(0f, depthHeight.toFloat())
+
+        val width = boxRight - boxLeft
+        val height = boxBottom - boxTop
+
+        if (width <= 0f || height <= 0f) {
+            return null
+        }
+
+        // Central 40% x 40% region
+        val roiLeft = (boxLeft + width * 0.30f).toInt()
+        val roiRight = (boxRight - width * 0.30f).toInt()
+        val roiTop = (boxTop + height * 0.30f).toInt()
+        val roiBottom = (boxBottom - height * 0.30f).toInt()
+
+        if (roiRight <= roiLeft || roiBottom <= roiTop) {
+            return null
+        }
+
+        val values = ArrayList<Int>()
+
+        for (y in roiTop..roiBottom) {
+            for (x in roiLeft..roiRight) {
+
+                if (x !in 0 until depthWidth ||
+                    y !in 0 until depthHeight) {
+                    continue
+                }
+
+                val index = y * depthWidth + x
+
+                if (index >= depthData.size) {
+                    continue
+                }
+
+                val depthMm = depthData[index].toInt() and 0xFFFF
+
+                if (
+                    depthMm >= MIN_DEPTH_MM &&
+                    depthMm <= MAX_DEPTH_MM
+                ) {
+                    values.add(depthMm)
+                }
+            }
+        }
+
+        if (values.isEmpty()) {
+            return null
+        }
+
+        values.sort()
+
+        val middle = values.size / 2
+
+        return if (values.size % 2 == 0) {
+            (values[middle - 1] + values[middle]) / 2f
+        } else {
+            values[middle].toFloat()
+        }
+    }
+
+    fun depthMmToMeters(depthMm: Float): Float {
+        return depthMm / 1000f
+    }
+}

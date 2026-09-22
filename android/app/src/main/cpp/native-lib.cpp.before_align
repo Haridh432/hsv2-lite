@@ -1,0 +1,1679 @@
+#include <jni.h>
+#include <string>
+#include <android/log.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
+#include <thread>
+#include <atomic>
+#include <mutex>
+#include <vector>
+#include <cstring>
+#include <chrono>
+#include <algorithm>
+#include <cmath>
+
+#include <librealsense2/rs.hpp>
+#include <librealsense2/rsutil.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "HSV2Native", __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "HSV2Native", __VA_ARGS__)
+
+int currentStage = 1;
+bool isCameraInitialized = false;
+
+// ============================================================================
+// RealSense Global State
+// ============================================================================
+
+std::unique_ptr<rs2::context> rs_ctx;
+std::unique_ptr<rs2::pipeline> rs_pipe;
+
+ANativeWindow* nativeWindow = nullptr;
+ANativeWindow* depthNativeWindow = nullptr;
+
+std::atomic<bool> isStreaming(false);
+std::thread streamThread;
+std::atomic<double> current_fps(0.0);
+
+// ============================================================================
+// D455 RGB <-> Depth calibration
+// ============================================================================
+
+rs2_intrinsics color_intrinsics{};
+rs2_intrinsics depth_intrinsics{};
+
+rs2_extrinsics color_to_depth_extrinsics{};
+rs2_extrinsics depth_to_color_extrinsics{};
+
+float depth_scale = 0.001f;
+bool calibration_ready = false;
+
+// ============================================================================
+// Telemetry state
+// ============================================================================
+
+std::mutex telemetry_mutex;
+char telemetry_json[4096] = "{}";
+
+// ============================================================================
+// Latest RGB frame
+// ============================================================================
+
+std::mutex latest_rgb_mutex;
+
+std::vector<uint8_t> latest_rgb_frame;
+
+int latest_rgb_width = 0;
+int latest_rgb_height = 0;
+
+double latest_rgb_timestamp_ms = 0.0;
+
+unsigned long long latest_rgb_frame_num = 0;
+
+// ============================================================================
+// Latest Depth frame
+// ============================================================================
+
+std::mutex latest_depth_mutex;
+
+std::vector<uint16_t> latest_depth_frame;
+
+int latest_depth_width = 0;
+int latest_depth_height = 0;
+
+double latest_depth_timestamp_ms = 0.0;
+
+unsigned long long latest_depth_frame_num = 0;
+
+// ============================================================================
+// RGB BOX -> DEPTH BOX MAPPING
+// ============================================================================
+//
+// MediaPipe detection box:
+//
+//     RGB image
+//        |
+//        v
+//     RGB bounding box
+//        |
+//        v
+//     RealSense RGB -> Depth projection
+//        |
+//        v
+//     Depth bounding box
+//
+// The resulting depth box will later be passed to DepthProcessor for
+// central ROI median depth calculation.
+// ============================================================================
+
+static bool mapColorBoxToDepthBox(
+        float color_left,
+        float color_top,
+        float color_right,
+        float color_bottom,
+        float& depth_left,
+        float& depth_top,
+        float& depth_right,
+        float& depth_bottom) {
+
+    // ------------------------------------------------------------------------
+    // Calibration check
+    // ------------------------------------------------------------------------
+
+    if (!calibration_ready) {
+
+        LOGE(
+                "mapColorBoxToDepthBox: "
+                "calibration not ready");
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+    // Validate RGB bounding box
+    // ------------------------------------------------------------------------
+
+    if (color_right <= color_left ||
+        color_bottom <= color_top) {
+
+        LOGE(
+                "mapColorBoxToDepthBox: "
+                "invalid RGB bounding box");
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+    // Copy latest depth frame safely
+    // ------------------------------------------------------------------------
+
+    std::vector<uint16_t> depth_copy;
+
+    int depth_width = 0;
+    int depth_height = 0;
+
+    {
+        std::lock_guard<std::mutex> lock(
+                latest_depth_mutex);
+
+        if (latest_depth_frame.empty() ||
+            latest_depth_width <= 0 ||
+            latest_depth_height <= 0) {
+
+            LOGE(
+                    "mapColorBoxToDepthBox: "
+                    "no latest depth frame");
+
+            return false;
+        }
+
+        depth_copy =
+                latest_depth_frame;
+
+        depth_width =
+                latest_depth_width;
+
+        depth_height =
+                latest_depth_height;
+    }
+
+    // ------------------------------------------------------------------------
+    // Validate depth buffer
+    // ------------------------------------------------------------------------
+
+    const size_t expected_depth_pixels =
+            static_cast<size_t>(depth_width) *
+            static_cast<size_t>(depth_height);
+
+    if (depth_copy.size() <
+            expected_depth_pixels) {
+
+        LOGE(
+                "mapColorBoxToDepthBox: "
+                "invalid depth frame size");
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+    // Clamp RGB coordinates
+    // ------------------------------------------------------------------------
+
+    const float color_width =
+            static_cast<float>(
+                    color_intrinsics.width);
+
+    const float color_height =
+            static_cast<float>(
+                    color_intrinsics.height);
+
+    color_left =
+            std::clamp(
+                    color_left,
+                    0.0f,
+                    color_width - 1.0f);
+
+    color_top =
+            std::clamp(
+                    color_top,
+                    0.0f,
+                    color_height - 1.0f);
+
+    color_right =
+            std::clamp(
+                    color_right,
+                    0.0f,
+                    color_width - 1.0f);
+
+    color_bottom =
+            std::clamp(
+                    color_bottom,
+                    0.0f,
+                    color_height - 1.0f);
+
+    if (color_right <= color_left ||
+        color_bottom <= color_top) {
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+    // Five RGB points
+    //
+    //       TL ---------------- TR
+    //       |                   |
+    //       |         C         |
+    //       |                   |
+    //       BL ---------------- BR
+    //
+    // Four corners + center.
+    // ------------------------------------------------------------------------
+
+    const float points[5][2] = {
+
+        // Top-left
+        {
+                color_left,
+                color_top
+        },
+
+        // Top-right
+        {
+                color_right,
+                color_top
+        },
+
+        // Bottom-left
+        {
+                color_left,
+                color_bottom
+        },
+
+        // Bottom-right
+        {
+                color_right,
+                color_bottom
+        },
+
+        // Center
+        {
+                (color_left + color_right) * 0.5f,
+                (color_top + color_bottom) * 0.5f
+        }
+    };
+
+    // ------------------------------------------------------------------------
+    // Initialize depth bounding box
+    // ------------------------------------------------------------------------
+
+    float min_x =
+            static_cast<float>(
+                    depth_width);
+
+    float min_y =
+            static_cast<float>(
+                    depth_height);
+
+    float max_x = -1.0f;
+    float max_y = -1.0f;
+
+    int valid_points = 0;
+
+    // ------------------------------------------------------------------------
+    // RGB -> Depth projection
+    // ------------------------------------------------------------------------
+
+    for (int i = 0; i < 5; ++i) {
+
+        const float color_pixel[2] = {
+                points[i][0],
+                points[i][1]
+        };
+
+        float depth_pixel[2] = {
+                0.0f,
+                0.0f
+        };
+
+        /*
+         * Correct 10-argument RealSense API:
+         *
+         * 1  to_pixel
+         * 2  depth
+         * 3  depth_scale
+         * 4  depth_min
+         * 5  depth_max
+         * 6  depth_intrinsics
+         * 7  color_intrinsics
+         * 8  color_to_depth_extrinsics
+         * 9  depth_to_color_extrinsics
+         * 10 from_pixel
+         */
+
+        rs2_project_color_pixel_to_depth_pixel(
+                depth_pixel,
+                depth_copy.data(),
+                depth_scale,
+                0.1f,
+                10.0f,
+                &depth_intrinsics,
+                &color_intrinsics,
+                &color_to_depth_extrinsics,
+                &depth_to_color_extrinsics,
+                color_pixel);
+
+        // --------------------------------------------------------------------
+        // Diagnostic: inspect depth near projected coordinate
+        // --------------------------------------------------------------------
+
+        int sample_x = static_cast<int>(depth_pixel[0]);
+        int sample_y = static_cast<int>(depth_pixel[1]);
+
+        if (sample_x >= 0 &&
+            sample_x < depth_width &&
+            sample_y >= 0 &&
+            sample_y < depth_height) {
+
+            const int sample_index =
+                    sample_y * depth_width + sample_x;
+
+            const uint16_t sample_depth_raw =
+                    depth_copy[sample_index];
+
+            const float sample_depth_m =
+                    sample_depth_raw * depth_scale;
+
+            LOGI(
+                    "Projection depth %d: "
+                    "DepthPixel[%.1f, %.1f] "
+                    "raw=%u distance=%.3f m",
+                    i,
+                    depth_pixel[0],
+                    depth_pixel[1],
+                    sample_depth_raw,
+                    sample_depth_m);
+        } else {
+            LOGI(
+                    "Projection depth %d: "
+                    "DepthPixel[%.1f, %.1f] outside image",
+                    i,
+                    depth_pixel[0],
+                    depth_pixel[1]);
+        }
+
+        // --------------------------------------------------------------------
+        // Validate projected coordinate
+        // --------------------------------------------------------------------
+
+        if (!std::isfinite(depth_pixel[0]) ||
+            !std::isfinite(depth_pixel[1])) {
+
+            LOGI(
+                    "Projection point %d rejected: "
+                    "non-finite Depth[%.1f, %.1f]",
+                    i,
+                    depth_pixel[0],
+                    depth_pixel[1]);
+
+            continue;
+        }
+
+        // --------------------------------------------------------------------
+        // Reject projections outside actual depth image
+        // --------------------------------------------------------------------
+
+        if (depth_pixel[0] < 0.0f ||
+            depth_pixel[0] >= static_cast<float>(depth_width) ||
+            depth_pixel[1] < 0.0f ||
+            depth_pixel[1] >= static_cast<float>(depth_height)) {
+
+            LOGI(
+                    "Projection point %d rejected: "
+                    "RGB[%.1f, %.1f] -> "
+                    "Depth[%.1f, %.1f] outside %dx%d",
+                    i,
+                    color_pixel[0],
+                    color_pixel[1],
+                    depth_pixel[0],
+                    depth_pixel[1],
+                    depth_width,
+                    depth_height);
+
+            continue;
+        }
+
+        // --------------------------------------------------------------------
+        // Reject zero projection
+        // --------------------------------------------------------------------
+
+        if (depth_pixel[0] == 0.0f &&
+            depth_pixel[1] == 0.0f) {
+
+            LOGI(
+                    "Projection point %d rejected: "
+                    "RGB[%.1f, %.1f] -> Depth[0.0, 0.0]",
+                    i,
+                    color_pixel[0],
+                    color_pixel[1]);
+
+            continue;
+        }
+
+        // --------------------------------------------------------------------
+        // Valid projection
+        // --------------------------------------------------------------------
+
+        valid_points++;
+
+        LOGI(
+                "Projection point %d: "
+                "RGB[%.1f, %.1f] -> "
+                "Depth[%.1f, %.1f]",
+                i,
+                color_pixel[0],
+                color_pixel[1],
+                depth_pixel[0],
+                depth_pixel[1]);
+
+        min_x =
+                std::min(
+                        min_x,
+                        depth_pixel[0]);
+
+        min_y =
+                std::min(
+                        min_y,
+                        depth_pixel[1]);
+
+        max_x =
+                std::max(
+                        max_x,
+                        depth_pixel[0]);
+
+        max_y =
+                std::max(
+                        max_y,
+                        depth_pixel[1]);
+    }
+
+    // ------------------------------------------------------------------------
+    // No valid projection
+    // ------------------------------------------------------------------------
+
+    if (valid_points == 0) {
+
+        LOGE(
+                "mapColorBoxToDepthBox: "
+                "no valid projected points");
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+    // Check projected box
+    // ------------------------------------------------------------------------
+
+    if (max_x < 0.0f ||
+        max_y < 0.0f ||
+        min_x >
+                static_cast<float>(
+                        depth_width - 1) ||
+        min_y >
+                static_cast<float>(
+                        depth_height - 1)) {
+
+        LOGE(
+                "mapColorBoxToDepthBox: "
+                "projected box outside depth image");
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+    // Clamp final depth box
+    // ------------------------------------------------------------------------
+
+    depth_left =
+            std::clamp(
+                    min_x,
+                    0.0f,
+                    static_cast<float>(
+                            depth_width - 1));
+
+    depth_top =
+            std::clamp(
+                    min_y,
+                    0.0f,
+                    static_cast<float>(
+                            depth_height - 1));
+
+    depth_right =
+            std::clamp(
+                    max_x,
+                    0.0f,
+                    static_cast<float>(
+                            depth_width - 1));
+
+    depth_bottom =
+            std::clamp(
+                    max_y,
+                    0.0f,
+                    static_cast<float>(
+                            depth_height - 1));
+
+    // ------------------------------------------------------------------------
+    // Validate final box
+    // ------------------------------------------------------------------------
+
+    if (depth_right <= depth_left ||
+        depth_bottom <= depth_top) {
+
+        LOGE(
+                "mapColorBoxToDepthBox: "
+                "invalid mapped depth box");
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+    // Log mapping
+    // ------------------------------------------------------------------------
+
+    LOGI(
+            "RGB->Depth box: "
+            "RGB[%.1f,%.1f,%.1f,%.1f] "
+            "Depth[%.1f,%.1f,%.1f,%.1f] "
+            "valid=%d",
+
+            color_left,
+            color_top,
+            color_right,
+            color_bottom,
+
+            depth_left,
+            depth_top,
+            depth_right,
+            depth_bottom,
+
+            valid_points);
+
+    return true;
+}
+
+// ============================================================================
+// JNI BRIDGE: RGB BOX -> DEPTH BOX
+// ============================================================================
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_mapColorBoxToDepthBox(
+        JNIEnv* env,
+        jobject /* thiz */,
+        jfloat left,
+        jfloat top,
+        jfloat right,
+        jfloat bottom) {
+
+    float depth_left = 0.0f;
+    float depth_top = 0.0f;
+    float depth_right = 0.0f;
+    float depth_bottom = 0.0f;
+
+    const bool success =
+            mapColorBoxToDepthBox(
+                    left,
+                    top,
+                    right,
+                    bottom,
+                    depth_left,
+                    depth_top,
+                    depth_right,
+                    depth_bottom);
+
+    if (!success) {
+
+        LOGE(
+                "mapColorBoxToDepthBox JNI failed");
+
+        return nullptr;
+    }
+
+    jfloatArray output =
+            env->NewFloatArray(4);
+
+    if (output == nullptr) {
+
+        LOGE(
+                "Failed to allocate depth box array");
+
+        return nullptr;
+    }
+
+    const jfloat values[4] = {
+            depth_left,
+            depth_top,
+            depth_right,
+            depth_bottom
+    };
+
+    env->SetFloatArrayRegion(
+            output,
+            0,
+            4,
+            values);
+
+    LOGI(
+            "JNI RGB->Depth box: "
+            "RGB[%.1f, %.1f, %.1f, %.1f] "
+            "Depth[%.1f, %.1f, %.1f, %.1f]",
+
+            left,
+            top,
+            right,
+            bottom,
+
+            depth_left,
+            depth_top,
+            depth_right,
+            depth_bottom);
+
+    return output;
+}
+
+// ============================================================================
+// Forward declare internal librealsense USB device injection method
+// ============================================================================
+
+extern "C" void
+Java_com_intel_realsense_librealsense_DeviceWatcher_nAddUsbDevice(
+        JNIEnv *env,
+        jclass type,
+        jstring deviceName,
+        jint fileDescriptor);
+
+// ============================================================================
+// INIT REALSENSE
+// ============================================================================
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_initRealSenseWithFD(
+        JNIEnv* env,
+        jobject /* this */,
+        jint fd,
+        jstring usbfsPath) {
+
+    const char *path =
+            env->GetStringUTFChars(
+                    usbfsPath,
+                    nullptr);
+
+    LOGI(
+            "Init RealSense with FD: %d, Path: %s",
+            fd,
+            path);
+
+    try {
+
+        if (!rs_ctx) {
+
+            rs_ctx =
+                    std::make_unique<rs2::context>();
+
+            LOGI(
+                    "librealsense2 context instantiated successfully!");
+        }
+
+        Java_com_intel_realsense_librealsense_DeviceWatcher_nAddUsbDevice(
+                env,
+                nullptr,
+                usbfsPath,
+                fd);
+
+        LOGI(
+                "Successfully injected USB FD into rsusb backend!");
+
+    } catch (const std::exception& e) {
+
+        LOGE(
+                "Error: %s",
+                e.what());
+
+        env->ReleaseStringUTFChars(
+                usbfsPath,
+                path);
+
+        return JNI_FALSE;
+    }
+
+    env->ReleaseStringUTFChars(
+            usbfsPath,
+            path);
+
+    isCameraInitialized = true;
+
+    return JNI_TRUE;
+}
+
+// ============================================================================
+// START PIPELINE
+// ============================================================================
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_startPipeline(
+        JNIEnv* env,
+        jobject /* this */) {
+
+    if (isStreaming ||
+        !rs_ctx) {
+
+        return;
+    }
+
+    try {
+
+        rs_pipe =
+                std::make_unique<rs2::pipeline>(
+                        *rs_ctx);
+
+        rs2::config cfg;
+
+        // --------------------------------------------------------------------
+        // COLOR STREAM
+        // --------------------------------------------------------------------
+
+        cfg.enable_stream(
+                RS2_STREAM_COLOR,
+                640,
+                480,
+                RS2_FORMAT_RGBA8,
+                15);
+
+        // --------------------------------------------------------------------
+        // DEPTH STREAM
+        // --------------------------------------------------------------------
+
+        cfg.enable_stream(
+                RS2_STREAM_DEPTH,
+                640,
+                480,
+                RS2_FORMAT_Z16,
+                15);
+
+        // --------------------------------------------------------------------
+        // START PIPELINE
+        // --------------------------------------------------------------------
+
+        rs2::pipeline_profile pipeline_profile =
+                rs_pipe->start(cfg);
+
+        // --------------------------------------------------------------------
+        // CACHE D455 CALIBRATION
+        // --------------------------------------------------------------------
+
+        try {
+
+            auto color_profile =
+                    pipeline_profile
+                            .get_stream(
+                                    RS2_STREAM_COLOR)
+                            .as<rs2::video_stream_profile>();
+
+            auto depth_profile =
+                    pipeline_profile
+                            .get_stream(
+                                    RS2_STREAM_DEPTH)
+                            .as<rs2::video_stream_profile>();
+
+            auto depth_sensor =
+                    pipeline_profile
+                            .get_device()
+                            .first<rs2::depth_sensor>();
+
+            depth_scale =
+                    depth_sensor.get_depth_scale();
+
+            color_intrinsics =
+                    color_profile.get_intrinsics();
+
+            depth_intrinsics =
+                    depth_profile.get_intrinsics();
+
+            color_to_depth_extrinsics =
+                    color_profile.get_extrinsics_to(
+                            depth_profile);
+
+            depth_to_color_extrinsics =
+                    depth_profile.get_extrinsics_to(
+                            color_profile);
+
+            calibration_ready = true;
+
+            LOGI(
+                    "D455 calibration ready: "
+                    "color=%dx%d fx=%.2f fy=%.2f "
+                    "depth=%dx%d fx=%.2f fy=%.2f "
+                    "depth_scale=%.6f",
+
+                    color_intrinsics.width,
+                    color_intrinsics.height,
+                    color_intrinsics.fx,
+                    color_intrinsics.fy,
+
+                    depth_intrinsics.width,
+                    depth_intrinsics.height,
+                    depth_intrinsics.fx,
+                    depth_intrinsics.fy,
+
+                    depth_scale);
+
+        } catch (const rs2::error& e) {
+
+            calibration_ready = false;
+
+            LOGE(
+                    "Failed to get D455 calibration: %s",
+                    e.what());
+        }
+
+        isStreaming = true;
+
+        current_fps = 0.0;
+
+        // --------------------------------------------------------------------
+        // STREAM THREAD
+        // --------------------------------------------------------------------
+
+        streamThread =
+                std::thread([]() {
+
+            LOGI(
+                    "Native stream thread started!");
+
+            rs2::colorizer color_map;
+
+            auto last_time =
+                    std::chrono::steady_clock::now();
+
+            int frame_count = 0;
+
+            unsigned long long last_frame_num = 0;
+
+            int total_dropped_frames = 0;
+
+            while (isStreaming) {
+
+                if (currentStage >= 1) {
+
+                    try {
+
+                        const auto frame_loop_start =
+                                std::chrono::steady_clock::now();
+
+                        rs2::frameset frames =
+                                rs_pipe->wait_for_frames(
+                                        5000);
+
+                        const auto frames_received =
+                                std::chrono::steady_clock::now();
+
+                        const double wait_ms =
+                                std::chrono::duration<
+                                        double,
+                                        std::milli>(
+                                        frames_received -
+                                        frame_loop_start)
+                                        .count();
+
+                        const double align_ms = 0.0;
+
+                        rs2::video_frame color_frame =
+                                frames.get_color_frame();
+
+                        rs2::depth_frame depth_frame =
+                                frames.get_depth_frame();
+
+                        // -----------------------------------------------------
+                        // COPY LATEST DEPTH FRAME
+                        // -----------------------------------------------------
+
+                        if (depth_frame) {
+
+                            const int depth_width =
+                                    depth_frame.get_width();
+
+                            const int depth_height =
+                                    depth_frame.get_height();
+
+                            const size_t depth_pixels =
+                                    static_cast<size_t>(
+                                            depth_width) *
+                                    static_cast<size_t>(
+                                            depth_height);
+
+                            std::lock_guard<std::mutex>
+                                    depth_lock(
+                                            latest_depth_mutex);
+
+                            latest_depth_frame.resize(
+                                    depth_pixels);
+
+                            std::memcpy(
+                                    latest_depth_frame.data(),
+                                    depth_frame.get_data(),
+                                    depth_pixels *
+                                            sizeof(uint16_t));
+
+                            latest_depth_width =
+                                    depth_width;
+
+                            latest_depth_height =
+                                    depth_height;
+
+                            latest_depth_timestamp_ms =
+                                    depth_frame.get_timestamp();
+
+                            latest_depth_frame_num =
+                                    depth_frame.get_frame_number();
+                        }
+
+                        // -----------------------------------------------------
+                        // COPY LATEST RGB FRAME
+                        // -----------------------------------------------------
+
+                        const auto rgb_copy_start =
+                                std::chrono::steady_clock::now();
+
+                        if (color_frame) {
+
+                            const int rgb_width =
+                                    color_frame.get_width();
+
+                            const int rgb_height =
+                                    color_frame.get_height();
+
+                            const size_t rgb_bytes =
+                                    static_cast<size_t>(
+                                            rgb_width) *
+                                    static_cast<size_t>(
+                                            rgb_height) *
+                                    4;
+
+                            std::lock_guard<std::mutex>
+                                    rgb_lock(
+                                            latest_rgb_mutex);
+
+                            latest_rgb_frame.resize(
+                                    rgb_bytes);
+
+                            std::memcpy(
+                                    latest_rgb_frame.data(),
+                                    color_frame.get_data(),
+                                    rgb_bytes);
+
+                            latest_rgb_width =
+                                    rgb_width;
+
+                            latest_rgb_height =
+                                    rgb_height;
+
+                            latest_rgb_timestamp_ms =
+                                    color_frame.get_timestamp();
+
+                            latest_rgb_frame_num =
+                                    color_frame.get_frame_number();
+                        }
+
+                        const auto rgb_copy_end =
+                                std::chrono::steady_clock::now();
+
+                        const double rgb_copy_ms =
+                                std::chrono::duration<
+                                        double,
+                                        std::milli>(
+                                        rgb_copy_end -
+                                        rgb_copy_start)
+                                        .count();
+
+                        // -----------------------------------------------------
+                        // DROPPED FRAME TRACKING
+                        // -----------------------------------------------------
+
+                        unsigned long long current_frame_num =
+                                color_frame.get_frame_number();
+
+                        if (last_frame_num != 0 &&
+                            current_frame_num >
+                                    last_frame_num + 1) {
+
+                            total_dropped_frames +=
+                                    static_cast<int>(
+                                            current_frame_num -
+                                            last_frame_num -
+                                            1);
+                        }
+
+                        last_frame_num =
+                                current_frame_num;
+
+                        // -----------------------------------------------------
+                        // CAMERA-TO-FRAME LATENCY
+                        // -----------------------------------------------------
+
+                        double frame_timestamp_ms =
+                                color_frame.get_timestamp();
+
+                        auto now_sys =
+                                std::chrono::system_clock::now();
+
+                        double sys_time_ms =
+                                std::chrono::duration_cast<
+                                        std::chrono::milliseconds>(
+                                        now_sys.time_since_epoch())
+                                        .count();
+
+                        double latency =
+                                sys_time_ms -
+                                frame_timestamp_ms;
+
+                        if (latency < 0 ||
+                            latency > 1000) {
+
+                            latency = 16.6;
+                        }
+
+                        // -----------------------------------------------------
+                        // FPS
+                        // -----------------------------------------------------
+
+                        frame_count++;
+
+                        auto now =
+                                std::chrono::steady_clock::now();
+
+                        auto elapsed =
+                                std::chrono::duration_cast<
+                                        std::chrono::milliseconds>(
+                                        now - last_time)
+                                        .count();
+
+                        if (elapsed >= 1000) {
+
+                            current_fps =
+                                    (frame_count * 1000.0) /
+                                    elapsed;
+
+                            frame_count = 0;
+
+                            last_time = now;
+                        }
+
+                        // -----------------------------------------------------
+                        // RGB RENDER
+                        // -----------------------------------------------------
+
+                        double rgb_render_ms = 0.0;
+
+                        if (nativeWindow &&
+                            color_frame) {
+
+                            const auto rgb_render_start =
+                                    std::chrono::steady_clock::now();
+
+                            ANativeWindow_Buffer buffer;
+
+                            if (ANativeWindow_lock(
+                                        nativeWindow,
+                                        &buffer,
+                                        nullptr) == 0) {
+
+                                int width =
+                                        color_frame.get_width();
+
+                                int height =
+                                        color_frame.get_height();
+
+                                if (buffer.width >= width &&
+                                    buffer.height >= height) {
+
+                                    uint8_t* out =
+                                            static_cast<uint8_t*>(
+                                                    buffer.bits);
+
+                                    const uint8_t* in =
+                                            static_cast<const uint8_t*>(
+                                                    color_frame.get_data());
+
+                                    for (int y = 0;
+                                         y < height;
+                                         ++y) {
+
+                                        memcpy(
+                                                out +
+                                                y *
+                                                        buffer.stride *
+                                                        4,
+
+                                                in +
+                                                y *
+                                                        width *
+                                                        4,
+
+                                                width * 4);
+                                    }
+                                }
+
+                                // -------------------------------------------------
+                                // DEPTH
+                                // -------------------------------------------------
+
+                                float center_distance =
+                                        0.0f;
+
+                                double depth_render_ms =
+                                        0.0;
+
+                                if (depth_frame) {
+
+                                    int dwidth =
+                                            depth_frame.get_width();
+
+                                    int dheight =
+                                            depth_frame.get_height();
+
+                                    center_distance =
+                                            depth_frame.get_distance(
+                                                    dwidth / 2,
+                                                    dheight / 2);
+
+                                    if (depthNativeWindow) {
+
+                                        const auto depth_start =
+                                                std::chrono::steady_clock::now();
+
+                                        rs2::frame colorized_depth =
+                                                color_map.process(
+                                                        depth_frame);
+
+                                        ANativeWindow_Buffer dbuffer;
+
+                                        if (ANativeWindow_lock(
+                                                    depthNativeWindow,
+                                                    &dbuffer,
+                                                    nullptr) == 0) {
+
+                                            if (dbuffer.width >= dwidth &&
+                                                dbuffer.height >= dheight) {
+
+                                                const uint8_t* in =
+                                                        static_cast<
+                                                                const uint8_t*>(
+                                                                colorized_depth
+                                                                        .get_data());
+
+                                                uint8_t* out =
+                                                        static_cast<uint8_t*>(
+                                                                dbuffer.bits);
+
+                                                for (int y = 0;
+                                                     y < dheight;
+                                                     ++y) {
+
+                                                    for (int x = 0;
+                                                         x < dwidth;
+                                                         ++x) {
+
+                                                        int out_idx =
+                                                                y *
+                                                                        dbuffer.stride *
+                                                                        4 +
+                                                                x * 4;
+
+                                                        int in_idx =
+                                                                y *
+                                                                        dwidth *
+                                                                        3 +
+                                                                x * 3;
+
+                                                        out[out_idx + 0] =
+                                                                in[in_idx + 0];
+
+                                                        out[out_idx + 1] =
+                                                                in[in_idx + 1];
+
+                                                        out[out_idx + 2] =
+                                                                in[in_idx + 2];
+
+                                                        out[out_idx + 3] =
+                                                                255;
+                                                    }
+                                                }
+                                            }
+
+                                            ANativeWindow_unlockAndPost(
+                                                    depthNativeWindow);
+                                        }
+
+                                        const auto depth_end =
+                                                std::chrono::steady_clock::now();
+
+                                        depth_render_ms =
+                                                std::chrono::duration<
+                                                        double,
+                                                        std::milli>(
+                                                        depth_end -
+                                                        depth_start)
+                                                        .count();
+                                    }
+                                }
+
+                                // -------------------------------------------------
+                                // TELEMETRY
+                                // -------------------------------------------------
+
+                                std::string detections_json =
+                                        "[]";
+
+                                std::lock_guard<std::mutex> lock(
+                                        telemetry_mutex);
+
+                                snprintf(
+                                        telemetry_json,
+                                        sizeof(telemetry_json),
+
+                                        "{\"fps\": %.1f, "
+                                        "\"p50\": %.1f, "
+                                        "\"p95\": 35.0, "
+                                        "\"p99\": 45.0, "
+                                        "\"cpu\": 30.0, "
+                                        "\"gpu\": 15.0, "
+                                        "\"npu\": 5.0, "
+                                        "\"thermal\": 38.0, "
+                                        "\"battery\": 100.0, "
+                                        "\"centerDistance\": %.2f, "
+                                        "\"droppedFrames\": %d, "
+                                        "\"detections\": %s}",
+
+                                        current_fps.load(),
+
+                                        latency,
+
+                                        center_distance,
+
+                                        total_dropped_frames,
+
+                                        detections_json.c_str());
+
+                                ANativeWindow_unlockAndPost(
+                                        nativeWindow);
+
+                                const auto rgb_render_end =
+                                        std::chrono::steady_clock::now();
+
+                                rgb_render_ms =
+                                        std::chrono::duration<
+                                                double,
+                                                std::milli>(
+                                                rgb_render_end -
+                                                rgb_render_start)
+                                                .count();
+
+                                // -------------------------------------------------
+                                // TOTAL FRAME LOOP TIMING
+                                // -------------------------------------------------
+
+                                const auto frame_loop_end =
+                                        std::chrono::steady_clock::now();
+
+                                const double total_loop_ms =
+                                        std::chrono::duration<
+                                                double,
+                                                std::milli>(
+                                                frame_loop_end -
+                                                frame_loop_start)
+                                                .count();
+
+                                LOGI(
+                                        "FRAME_TIMING "
+                                        "wait=%.1fms "
+                                        "align=%.1fms "
+                                        "rgb_copy=%.1fms "
+                                        "rgb_render=%.1fms "
+                                        "depth_render=%.1fms "
+                                        "total=%.1fms "
+                                        "fps=%.1f",
+
+                                        wait_ms,
+
+                                        align_ms,
+
+                                        rgb_copy_ms,
+
+                                        rgb_render_ms,
+
+                                        depth_render_ms,
+
+                                        total_loop_ms,
+
+                                        current_fps.load());
+                            }
+                        }
+
+                    } catch (const std::exception& e) {
+
+                        LOGE(
+                                "Frame loop exception: %s",
+                                e.what());
+                    }
+                }
+            }
+
+            LOGI(
+                    "Native stream thread stopped!");
+        });
+
+    } catch (const std::exception& e) {
+
+        LOGE(
+                "Failed to start pipeline: %s",
+                e.what());
+    }
+}
+
+// ============================================================================
+// CAPTURE CURRENT RGB FRAME
+// ============================================================================
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_captureCurrentRgbFrame(
+        JNIEnv* env,
+        jobject /* this */) {
+
+    std::vector<uint8_t> frame_copy;
+
+    int width = 0;
+    int height = 0;
+
+    {
+        std::lock_guard<std::mutex> lock(
+                latest_rgb_mutex);
+
+        if (latest_rgb_frame.empty()) {
+
+            LOGE(
+                    "captureCurrentRgbFrame: "
+                    "no latest RGB frame available");
+
+            return nullptr;
+        }
+
+        frame_copy =
+                latest_rgb_frame;
+
+        width =
+                latest_rgb_width;
+
+        height =
+                latest_rgb_height;
+    }
+
+    const size_t byte_count =
+            frame_copy.size();
+
+    jbyteArray result =
+            env->NewByteArray(
+                    static_cast<jsize>(
+                            byte_count));
+
+    if (!result) {
+
+        LOGE(
+                "captureCurrentRgbFrame: "
+                "failed to allocate byte array");
+
+        return nullptr;
+    }
+
+    env->SetByteArrayRegion(
+            result,
+            0,
+            static_cast<jsize>(
+                    byte_count),
+            reinterpret_cast<const jbyte*>(
+                    frame_copy.data()));
+
+    LOGI(
+            "captureCurrentRgbFrame: "
+            "latest frame %dx%d, %zu bytes",
+            width,
+            height,
+            byte_count);
+
+    return result;
+}
+
+// ============================================================================
+// STOP PIPELINE
+// ============================================================================
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_stopPipeline(
+        JNIEnv* env,
+        jobject /* this */) {
+
+    if (!isStreaming)
+        return;
+
+    isStreaming = false;
+
+    if (streamThread.joinable()) {
+
+        streamThread.join();
+    }
+
+    if (rs_pipe) {
+
+        try {
+
+            rs_pipe->stop();
+
+        } catch (...) {}
+
+        rs_pipe.reset();
+    }
+}
+
+// ============================================================================
+// SET STAGE
+// ============================================================================
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_setStage(
+        JNIEnv* env,
+        jobject /* this */,
+        jint stage) {
+
+    currentStage = stage;
+
+    LOGI(
+            "Pipeline Stage set to %d",
+            currentStage);
+}
+
+// ============================================================================
+// POLL TELEMETRY
+// ============================================================================
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_pollTelemetry(
+        JNIEnv* env,
+        jobject /* this */) {
+
+    if (!isStreaming) {
+
+        return env->NewStringUTF("{}");
+    }
+
+    std::string current_telemetry;
+
+    {
+        std::lock_guard<std::mutex> lock(
+                telemetry_mutex);
+
+        current_telemetry =
+                telemetry_json;
+    }
+
+    return env->NewStringUTF(
+            current_telemetry.c_str());
+}
+
+// ============================================================================
+// SET RGB NATIVE WINDOW
+// ============================================================================
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_setNativeWindow(
+        JNIEnv* env,
+        jobject /* this */,
+        jobject surface) {
+
+    if (nativeWindow) {
+
+        ANativeWindow_release(
+                nativeWindow);
+
+        nativeWindow = nullptr;
+    }
+
+    if (surface) {
+
+        nativeWindow =
+                ANativeWindow_fromSurface(
+                        env,
+                        surface);
+
+        LOGI(
+                "ANativeWindow set successfully!");
+    }
+}
+
+// ============================================================================
+// RELEASE RGB NATIVE WINDOW
+// ============================================================================
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_releaseNativeWindow(
+        JNIEnv* env,
+        jobject /* this */) {
+
+    if (nativeWindow) {
+
+        ANativeWindow_release(
+                nativeWindow);
+
+        nativeWindow = nullptr;
+    }
+}
+
+// ============================================================================
+// SET DEPTH NATIVE WINDOW
+// ============================================================================
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_setDepthNativeWindow(
+        JNIEnv* env,
+        jobject /* this */,
+        jobject surface) {
+
+    if (depthNativeWindow) {
+
+        ANativeWindow_release(
+                depthNativeWindow);
+
+        depthNativeWindow = nullptr;
+    }
+
+    if (surface) {
+
+        depthNativeWindow =
+                ANativeWindow_fromSurface(
+                        env,
+                        surface);
+
+        LOGI(
+                "Depth ANativeWindow set successfully!");
+    }
+}
+
+// ============================================================================
+// RELEASE DEPTH NATIVE WINDOW
+// ============================================================================
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_releaseDepthNativeWindow(
+        JNIEnv* env,
+        jobject /* this */) {
+
+    if (depthNativeWindow) {
+
+        ANativeWindow_release(
+                depthNativeWindow);
+
+        depthNativeWindow = nullptr;
+    }
+}
+
+// ============================================================================
+// CAPTURE CURRENT DEPTH FRAME
+// ============================================================================
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_hsv2_hsv2_1lite_MainActivity_captureCurrentDepthFrame(
+        JNIEnv* env,
+        jobject /* this */) {
+
+    std::vector<uint16_t> frame_copy;
+
+    int width = 0;
+    int height = 0;
+
+    {
+        std::lock_guard<std::mutex> lock(
+                latest_depth_mutex);
+
+        if (latest_depth_frame.empty()) {
+
+            LOGE(
+                    "captureCurrentDepthFrame: "
+                    "no latest depth frame available");
+
+            return nullptr;
+        }
+
+        frame_copy =
+                latest_depth_frame;
+
+        width =
+                latest_depth_width;
+
+        height =
+                latest_depth_height;
+    }
+
+    const size_t byte_count =
+            frame_copy.size() *
+            sizeof(uint16_t);
+
+    jbyteArray result =
+            env->NewByteArray(
+                    static_cast<jsize>(
+                            byte_count));
+
+    if (!result) {
+
+        LOGE(
+                "captureCurrentDepthFrame: "
+                "failed to allocate byte array");
+
+        return nullptr;
+    }
+
+    env->SetByteArrayRegion(
+            result,
+            0,
+            static_cast<jsize>(
+                    byte_count),
+            reinterpret_cast<const jbyte*>(
+                    frame_copy.data()));
+
+    LOGI(
+            "captureCurrentDepthFrame: "
+            "latest frame %dx%d, %zu bytes",
+            width,
+            height,
+            byte_count);
+
+    return result;
+}
