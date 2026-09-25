@@ -1,6 +1,11 @@
+#include <iomanip>
+#include <sstream>
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#include "vio/vio_engine.h"
+#include "librealsense/src/ds5/ds5-motion.h"
+#include "librealsense/src/ds5/ds5-color.h"
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <thread>
@@ -25,6 +30,16 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "HSV2Native", __VA_ARGS__)
 
 int currentStage = 1;
+
+// Actual VIO integration engine.
+hsv2::VioEngine g_vio_engine;
+
+// Persist the selected D455 IMU stream profiles so camera<->IMU
+// calibration/extrinsics can be queried after sensor startup.
+rs2::stream_profile g_d455_gyro_profile;
+rs2::stream_profile g_d455_accel_profile;
+bool g_d455_imu_profiles_valid = false;
+
 bool isCameraInitialized = false;
 
 // ============================================================================
@@ -1553,12 +1568,159 @@ Java_com_hsv2_hsv2_1lite_MainActivity_initRealSenseWithFD(
     return JNI_TRUE;
 }
 
+
 // ============================================================================
-// START D455 IMU SENSOR SEPARATELY FROM RGB/DEPTH PIPELINE
+// D455 CAMERA <-> IMU CALIBRATION QUERY
 // ============================================================================
+
+bool queryD455VioCalibration(
+    const rs2::pipeline_profile& pipeline_profile)
+{
+    LOGI("VIO CALIB TRACE: ENTER queryD455VioCalibration()");
+
+    try
+    {
+        auto* d455_motion =
+            librealsense::ds5_motion::get_active_vio_instance();
+
+        auto* d455_color =
+            librealsense::get_active_d455_vio_color_instance();
+
+        if (!d455_motion || !d455_color)
+        {
+            LOGI(
+                "VIO CALIB TRACE: active instance missing motion=%s color=%s",
+                d455_motion ? "VALID" : "NULL",
+                d455_color ? "VALID" : "NULL");
+            return false;
+        }
+
+        LOGI(
+            "VIO CALIB TRACE: active ds5_motion + ds5_color obtained");
+
+        rs2_extrinsics color_to_depth{};
+        rs2_extrinsics depth_to_imu{};
+
+        LOGI(
+            "VIO CALIB TRACE: BEFORE color_to_depth accessor");
+
+        const bool color_depth_ok =
+            d455_color->get_vio_color_to_depth_extrinsics(
+                color_to_depth);
+
+        LOGI(
+            "VIO CALIB TRACE: AFTER color_to_depth accessor result=%s",
+            color_depth_ok ? "SUCCESS" : "FAILED");
+
+        if (!color_depth_ok)
+        {
+            LOGI(
+                "VIO CALIB TRACE: color_to_depth accessor failed");
+            return false;
+        }
+
+        LOGI(
+            "VIO_COLOR_TO_DEPTH: t=[%.6f %.6f %.6f]",
+            color_to_depth.translation[0],
+            color_to_depth.translation[1],
+            color_to_depth.translation[2]);
+
+        LOGI(
+            "VIO CALIB TRACE: BEFORE depth_to_imu accessor");
+
+        const bool depth_imu_ok =
+            d455_motion->get_vio_depth_to_imu_extrinsics(
+                depth_to_imu);
+
+        LOGI(
+            "VIO CALIB TRACE: AFTER depth_to_imu accessor result=%s",
+            depth_imu_ok ? "SUCCESS" : "FAILED");
+
+        if (!depth_imu_ok)
+        {
+            LOGI(
+                "VIO CALIB TRACE: depth_to_imu accessor failed");
+            return false;
+        }
+
+        LOGI(
+            "VIO_DEPTH_TO_IMU: t=[%.6f %.6f %.6f]",
+            depth_to_imu.translation[0],
+            depth_to_imu.translation[1],
+            depth_to_imu.translation[2]);
+
+        // Compose Color -> Depth and Depth -> IMU:
+        //
+        // R_ci = R_di * R_cd
+        // t_ci = R_di * t_cd + t_di
+
+        rs2_extrinsics color_to_imu{};
+
+        for (int r = 0; r < 3; ++r)
+        {
+            for (int c = 0; c < 3; ++c)
+            {
+                color_to_imu.rotation[r * 3 + c] = 0.0f;
+
+                for (int k = 0; k < 3; ++k)
+                {
+                    color_to_imu.rotation[r * 3 + c] +=
+                        depth_to_imu.rotation[r * 3 + k] *
+                        color_to_depth.rotation[k * 3 + c];
+                }
+            }
+        }
+
+        for (int r = 0; r < 3; ++r)
+        {
+            color_to_imu.translation[r] =
+                depth_to_imu.translation[r];
+
+            for (int k = 0; k < 3; ++k)
+            {
+                color_to_imu.translation[r] +=
+                    depth_to_imu.rotation[r * 3 + k] *
+                    color_to_depth.translation[k];
+            }
+        }
+
+        LOGI(
+            "VIO_COLOR_TO_IMU: t=[%.6f %.6f %.6f]",
+            color_to_imu.translation[0],
+            color_to_imu.translation[1],
+            color_to_imu.translation[2]);
+
+        LOGI(
+            "VIO CALIB TRACE: Color->Depth + Depth->IMU composition SUCCESS");
+
+        return true;
+    }
+    catch (const rs2::error& e)
+    {
+        LOGI(
+            "VIO CALIB TRACE: RealSense error: %s",
+            e.what());
+        return false;
+    }
+    catch (const std::exception& e)
+    {
+        LOGI(
+            "VIO CALIB TRACE: std::exception: %s",
+            e.what());
+        return false;
+    }
+    catch (...)
+    {
+        LOGI(
+            "VIO CALIB TRACE: unknown exception");
+        return false;
+    }
+}
 
 bool startD455ImuSensor()
 {
+    LOGI("D455 IMU TRACE: ENTER startD455ImuSensor()");
+
     if (!rs_ctx) {
         LOGE("IMU start skipped: RealSense context unavailable");
         return false;
@@ -1638,6 +1800,16 @@ bool startD455ImuSensor()
                 continue;
             }
 
+            // Persist the selected profiles for VIO calibration/extrinsics queries.
+            g_d455_gyro_profile = selected_gyro;
+            g_d455_accel_profile = selected_accel;
+            g_d455_imu_profiles_valid = true;
+
+            LOGI(
+                    "VIO IMU profiles saved: gyro_fps=%d accel_fps=%d",
+                    selected_gyro.fps(),
+                    selected_accel.fps());
+
             std::vector<rs2::stream_profile> imu_profiles;
             imu_profiles.push_back(selected_gyro);
             imu_profiles.push_back(selected_accel);
@@ -1677,6 +1849,14 @@ bool startD455ImuSensor()
                         latest_gyro_data =
                                 motion_data;
 
+                        // Feed the real D455 gyro sample into VIO.
+                        g_vio_engine.addGyro(
+                                timestamp_ms,
+                                hsv2::Vec3{
+                                        motion_data.x,
+                                        motion_data.y,
+                                        motion_data.z});
+
                         const auto count =
                                 ++imu_gyro_count;
 
@@ -1709,6 +1889,14 @@ bool startD455ImuSensor()
 
                         latest_accel_data =
                                 motion_data;
+
+                        // Feed the real D455 accelerometer sample into VIO.
+                        g_vio_engine.addAccel(
+                                timestamp_ms,
+                                hsv2::Vec3{
+                                        motion_data.x,
+                                        motion_data.y,
+                                        motion_data.z});
 
                         const auto count =
                                 ++imu_accel_count;
@@ -2091,6 +2279,22 @@ Java_com_hsv2_hsv2_1lite_MainActivity_startPipeline(
                 imu_started ? "SUCCESS" : "FAILED");
 
         // --------------------------------------------------------------------
+        // QUERY D455 CAMERA <-> IMU CALIBRATION FOR VIO
+        // --------------------------------------------------------------------
+
+        if (imu_started) {
+            const bool vio_calibration_ok =
+                    queryD455VioCalibration(pipeline_profile);
+
+            LOGI(
+                    "D455 VIO calibration query result: %s",
+                    vio_calibration_ok ? "SUCCESS" : "FAILED");
+        } else {
+            LOGI(
+                    "D455 VIO calibration skipped: IMU startup failed");
+        }
+
+        // --------------------------------------------------------------------
         // CACHE D455 CALIBRATION
         // --------------------------------------------------------------------
 
@@ -2131,6 +2335,20 @@ Java_com_hsv2_hsv2_1lite_MainActivity_startPipeline(
                             color_profile);
 
             calibration_ready = true;
+
+            // Initialize VIO using the actual D455 RGB camera intrinsics.
+            const bool vio_initialized =
+                    g_vio_engine.initialize(
+                            color_intrinsics.width,
+                            color_intrinsics.height,
+                            color_intrinsics.fx,
+                            color_intrinsics.fy,
+                            color_intrinsics.ppx,
+                            color_intrinsics.ppy);
+
+            LOGI(
+                    "VIO initialization: %s",
+                    vio_initialized ? "SUCCESS" : "FAILED");
 
             LOGI(
                     "D455 calibration ready: "
@@ -2213,6 +2431,46 @@ Java_com_hsv2_hsv2_1lite_MainActivity_startPipeline(
 
                         rs2::depth_frame depth_frame =
                                 frames.get_depth_frame();
+
+                        // -----------------------------------------------------
+                        // ACTUAL VIO RGB INPUT
+                        // Feed the real D455 RGB frame and hardware timestamp
+                        // into the VIO engine.
+                        // -----------------------------------------------------
+
+                        if (color_frame &&
+                            g_vio_engine.isInitialized()) {
+
+                            const bool vio_image_ok =
+                                    g_vio_engine.addImage(
+                                            color_frame.get_timestamp(),
+                                            static_cast<const uint8_t*>(
+                                                    color_frame.get_data()),
+                                            color_frame.get_width(),
+                                            color_frame.get_height());
+
+                            if (currentStage == 4 && vio_image_ok) {
+
+                                const hsv2::VioTiming vio_timing =
+                                        g_vio_engine.getTiming();
+
+                                LOGI(
+                                        "VIO_INPUT: "
+                                        "frame=%llu "
+                                        "timestamp=%.3f "
+                                        "processing=%.3f ms "
+                                        "images=%llu "
+                                        "imu=%llu",
+                                        static_cast<unsigned long long>(
+                                                color_frame.get_frame_number()),
+                                        color_frame.get_timestamp(),
+                                        vio_timing.processing_ms,
+                                        static_cast<unsigned long long>(
+                                                vio_timing.image_count),
+                                        static_cast<unsigned long long>(
+                                                vio_timing.imu_count));
+                            }
+                        }
 
                         // -----------------------------------------------------
                         // LADDER STAGE 4
@@ -2821,43 +3079,55 @@ Java_com_hsv2_hsv2_1lite_MainActivity_startPipeline(
                                 std::lock_guard<std::mutex> lock(
                                         telemetry_mutex);
 
-                                snprintf(
+                                std::ostringstream telemetry_stream;
+                                telemetry_stream
+                                        << "{\"fps\": " << std::fixed << std::setprecision(1)
+                                        << current_fps.load()
+                                        << ", \"p50\": " << read_latency_p50()
+                                        << ", \"p95\": " << read_latency_p95()
+                                        << ", \"p99\": " << read_latency_p99()
+                                        << ", \"cpuClockMhz\": " << read_cpu_clock_max_mhz()
+                                        << ", \"thermal\": " << read_max_thermal_celsius()
+                                        << ", \"cpuThermalZones\": "
+                                        << read_cpu_thermal_zones_json()
+                                        << ", \"battery\": " << read_battery_percent()
+                                        << ", \"centerDistance\": " << std::setprecision(2)
+                                        << latency
+                                        << ", \"droppedFrames\": " << total_dropped_frames
+                                        << ", \"imu\": {"
+                                        << "\"gyro\": ["
+                                        << std::setprecision(5)
+                                        << latest_gyro_data.x << ", "
+                                        << latest_gyro_data.y << ", "
+                                        << latest_gyro_data.z << "], "
+                                        << "\"accel\": ["
+                                        << latest_accel_data.x << ", "
+                                        << latest_accel_data.y << ", "
+                                        << latest_accel_data.z << "], "
+                                        << "\"gyroTimestampMs\": "
+                                        << std::setprecision(3)
+                                        << latest_gyro_timestamp_ms
+                                        << ", \"accelTimestampMs\": "
+                                        << latest_accel_timestamp_ms
+                                        << ", \"gyroCount\": "
+                                        << static_cast<unsigned long long>(
+                                                imu_gyro_count.load())
+                                        << ", \"accelCount\": "
+                                        << static_cast<unsigned long long>(
+                                                imu_accel_count.load())
+                                        << "}, "
+                                        << "\"detections\": "
+                                        << detections_json
+                                        << "}";
+
+                                std::string telemetry_string =
+                                        telemetry_stream.str();
+
+                                std::snprintf(
                                         telemetry_json,
                                         sizeof(telemetry_json),
-
-                                        "{\"fps\": %.1f, "
-                                        "\"p50\": %.1f, "
-                                        "\"p95\": %.1f, "
-                                        "\"p99\": %.1f, "
-                                        "\"cpuClockMhz\": %.1f, "
-                                        "\"thermal\": %.1f, "
-                                        "\"cpuThermalZones\": %s, "
-                                        "\"battery\": %.1f, "
-                                        "\"centerDistance\": %.2f, "
-                                        "\"droppedFrames\": %d, "
-                                        "\"detections\": %s}",
-
-                                        current_fps.load(),
-
-                                        read_latency_p50(),
-                                        read_latency_p95(),
-                                        read_latency_p99(),
-
-                                        read_cpu_clock_max_mhz(),
-
-                                        read_max_thermal_celsius(),
-
-                                        read_cpu_thermal_zones_json().c_str(),
-
-                                        read_battery_percent(),
-
-                                        latency,
-
-                                        center_distance,
-
-                                        total_dropped_frames,
-
-                                        detections_json.c_str());
+                                        "%s",
+                                        telemetry_string.c_str());
 
                                 ANativeWindow_unlockAndPost(
                                         nativeWindow);

@@ -21,12 +21,21 @@ set(BUILD_WITH_TM2 OFF CACHE BOOL "" FORCE)
 add_subdirectory(librealsense)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
-include_directories(librealsense/include)
+include_directories(
+        librealsense/include
+        librealsense/src
+        librealsense/src/backend
+        librealsense/src/ds5
+        librealsense/src/types
+        librealsense/src/core
+)
 
 add_library(
         hsv2_lite
         SHARED
-        native-lib.cpp)
+        native-lib.cpp
+        vio/imu_buffer.cpp
+        vio/vio_engine.cpp)
 
 find_library(
         log-lib

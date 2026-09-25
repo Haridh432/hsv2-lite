@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_state.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_navigation.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class HSV2LiteApp extends StatelessWidget {
           primarySwatch: Colors.teal,
           scaffoldBackgroundColor: const Color(0xFF121212),
         ),
-        home: const HomeScreen(),
+        home: const MainNavigation(),
       ),
     );
   }

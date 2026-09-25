@@ -11,6 +11,9 @@
 
 namespace librealsense
 {
+    class ds5_color;
+
+    ds5_color* get_active_d455_vio_color_instance();
     class ds5_color : public virtual ds5_device
     {
     public:
@@ -27,6 +30,8 @@ namespace librealsense
             synthetic_sensor& color_sensor = get_color_sensor();
             return dynamic_cast<uvc_sensor&>(*color_sensor.get_raw_sensor());
         }
+
+        bool get_vio_color_to_depth_extrinsics(rs2_extrinsics& out) const;
 
     protected:
         std::shared_ptr<stream_interface> _color_stream;

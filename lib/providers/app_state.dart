@@ -152,11 +152,9 @@ class AppState extends ChangeNotifier {
   // SUSTAINED TEST / DIAGNOSTICS
   // =========================================================================
 
-  Duration _sustainedTestDuration =
-      const Duration(minutes: 30);
+  Duration _sustainedTestDuration = const Duration(minutes: 30);
 
-  static const Duration _sustainedSampleInterval =
-      Duration(seconds: 5);
+  static const Duration _sustainedSampleInterval = Duration(seconds: 5);
 
   Timer? _sustainedTestTimer;
 
@@ -186,109 +184,85 @@ class AppState extends ChangeNotifier {
   bool _sustainedSaveInProgress = false;
   bool _sustainedSavePending = false;
 
-  Map<String, double> get cpuThermalZones =>
-      Map.unmodifiable(_cpuThermalZones);
+  Map<String, double> get cpuThermalZones => Map.unmodifiable(_cpuThermalZones);
 
   String? get sustainedCsvPath => _sustainedCsvFile?.path;
   String? get sustainedJsonPath => _sustainedJsonFile?.path;
 
-  bool get isSustainedTestRunning =>
-      _sustainedTestTimer != null;
+  bool get isSustainedTestRunning => _sustainedTestTimer != null;
 
   int get sustainedSamples => _sustainedSamples;
 
   Duration get sustainedElapsed {
-    if (_sustainedTestStartedAt == null ||
-        !isSustainedTestRunning) {
+    if (_sustainedTestStartedAt == null || !isSustainedTestRunning) {
       return Duration.zero;
     }
 
-    final elapsed =
-        DateTime.now().difference(_sustainedTestStartedAt!);
+    final elapsed = DateTime.now().difference(_sustainedTestStartedAt!);
 
-    return elapsed > _sustainedTestDuration
-        ? _sustainedTestDuration
-        : elapsed;
+    return elapsed > _sustainedTestDuration ? _sustainedTestDuration : elapsed;
   }
 
   Duration get sustainedRemaining {
-    final remaining =
-        _sustainedTestDuration - sustainedElapsed;
+    final remaining = _sustainedTestDuration - sustainedElapsed;
 
-    return remaining.isNegative
-        ? Duration.zero
-        : remaining;
+    return remaining.isNegative ? Duration.zero : remaining;
   }
 
   double get sustainedProgress =>
-      (sustainedElapsed.inMilliseconds /
-              _sustainedTestDuration.inMilliseconds)
+      (sustainedElapsed.inMilliseconds / _sustainedTestDuration.inMilliseconds)
           .clamp(0.0, 1.0);
 
   int get sustainedFpsSamples => _sustainedFpsSamples;
 
   double get sustainedAverageFps =>
-      _sustainedFpsSamples == 0
-          ? 0.0
-          : _sustainedFpsSum / _sustainedFpsSamples;
+      _sustainedFpsSamples == 0 ? 0.0 : _sustainedFpsSum / _sustainedFpsSamples;
 
   double get sustainedMinFps =>
-      _sustainedFpsSamples == 0
-          ? 0.0
-          : _sustainedMinFps;
+      _sustainedFpsSamples == 0 ? 0.0 : _sustainedMinFps;
 
-  double get sustainedMaxTemperature =>
-      _sustainedMaxTemperature;
+  double get sustainedMaxTemperature => _sustainedMaxTemperature;
 
   double get sustainedCurrentFps =>
       isSustainedTestRunning ? telemetry.fps : 0.0;
 
   double get sustainedCurrentTemperature =>
-      isSustainedTestRunning
-          ? telemetry.thermalState
-          : 0.0;
+      isSustainedTestRunning ? telemetry.thermalState : 0.0;
 
   double get sustainedBatteryStart =>
       _sustainedStartBattery ?? telemetry.batteryLevel;
 
-  double get sustainedBatteryCurrent =>
-      telemetry.batteryLevel;
+  double get sustainedBatteryCurrent => telemetry.batteryLevel;
 
   double get sustainedBatteryDrain =>
-      (sustainedBatteryStart - sustainedBatteryCurrent)
-          .clamp(0.0, 100.0);
+      (sustainedBatteryStart - sustainedBatteryCurrent).clamp(0.0, 100.0);
 
   double? get cpuClockMhz => _cpuClockMhz;
   double? get gpuClockMhz => _gpuClockMhz;
 
-  String get sustainedStatus =>
-      isSustainedTestRunning ? 'RUNNING' : 'READY';
+  String get sustainedStatus => isSustainedTestRunning ? 'RUNNING' : 'READY';
 
   Future<void> startSustainedTest({
-    Duration duration =
-        const Duration(minutes: 30),
+    Duration duration = const Duration(minutes: 30),
   }) async {
     if (isSustainedTestRunning) return;
 
     _sustainedTestDuration = duration;
 
     _sustainedTestStartedAt = DateTime.now();
-    _sustainedStartBattery =
-        telemetry.batteryLevel;
+    _sustainedStartBattery = telemetry.batteryLevel;
 
     _sustainedMinFps = double.infinity;
     _sustainedFpsSum = 0.0;
     _sustainedFpsSamples = 0;
-    _sustainedMaxTemperature =
-        telemetry.thermalState;
+    _sustainedMaxTemperature = telemetry.thermalState;
     _sustainedSamples = 0;
 
     // Start a completely new test dataset.
     _sustainedSampleHistory.clear();
 
     // Create the CSV and JSON files in Android external app storage.
-    final directory =
-        await getExternalStorageDirectory();
+    final directory = await getExternalStorageDirectory();
 
     if (directory == null) {
       debugPrint(
@@ -313,8 +287,7 @@ class AppState extends ChangeNotifier {
     _sustainedTestTimer = Timer.periodic(
       const Duration(seconds: 1),
       (_) {
-        if (sustainedElapsed >=
-            _sustainedTestDuration) {
+        if (sustainedElapsed >= _sustainedTestDuration) {
           stopSustainedTest();
           return;
         }
@@ -346,8 +319,7 @@ class AppState extends ChangeNotifier {
     if (!isSustainedTestRunning) return;
 
     final fps = telemetry.fps;
-    final temperature =
-        telemetry.thermalState;
+    final temperature = telemetry.thermalState;
 
     if (fps > 0) {
       _sustainedFpsSum += fps;
@@ -358,57 +330,29 @@ class AppState extends ChangeNotifier {
       }
     }
 
-    if (temperature >
-        _sustainedMaxTemperature) {
-      _sustainedMaxTemperature =
-          temperature;
+    if (temperature > _sustainedMaxTemperature) {
+      _sustainedMaxTemperature = temperature;
     }
 
     _sustainedSamples++;
 
     _sustainedSampleHistory.add({
-      'timestamp':
-          DateTime.now().toIso8601String(),
-
-      'elapsedSeconds':
-          sustainedElapsed.inSeconds,
-
+      'timestamp': DateTime.now().toIso8601String(),
+      'elapsedSeconds': sustainedElapsed.inSeconds,
       'fps': fps,
-
-      'mediapipeCpuLatencyMs':
-          mediaPipeLatencyMs,
-
-      'e2eP50Ms':
-          e2eP50Ms,
-
-      'e2eP95Ms':
-          e2eP95Ms,
-
-      'e2eP99Ms':
-          e2eP99Ms,
-
-      'battery':
-          telemetry.batteryLevel,
-
-      'batteryTemperature':
-          telemetry.batteryTemperature,
-
-      'temperature':
-          temperature,
-
-      'maxTemperature':
-          _sustainedMaxTemperature,
-
-      'cpuClockMhz':
-          _cpuClockMhz,
-
-      'cpuThermalZones':
-          Map<String, double>.from(
+      'mediapipeCpuLatencyMs': mediaPipeLatencyMs,
+      'e2eP50Ms': e2eP50Ms,
+      'e2eP95Ms': e2eP95Ms,
+      'e2eP99Ms': e2eP99Ms,
+      'battery': telemetry.batteryLevel,
+      'batteryTemperature': telemetry.batteryTemperature,
+      'temperature': temperature,
+      'maxTemperature': _sustainedMaxTemperature,
+      'cpuClockMhz': _cpuClockMhz,
+      'cpuThermalZones': Map<String, double>.from(
         _cpuThermalZones,
       ),
-
-      'droppedFrames':
-          telemetry.droppedFrames,
+      'droppedFrames': telemetry.droppedFrames,
     });
 
     debugPrint(
@@ -432,8 +376,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _saveSustainedTestData() async {
-    if (_sustainedCsvFile == null ||
-        _sustainedJsonFile == null) {
+    if (_sustainedCsvFile == null || _sustainedJsonFile == null) {
       return;
     }
 
@@ -474,10 +417,8 @@ class AppState extends ChangeNotifier {
 
     final thermalZoneNames = <String>{};
 
-    for (final sample
-        in _sustainedSampleHistory) {
-      final zones =
-          sample['cpuThermalZones'];
+    for (final sample in _sustainedSampleHistory) {
+      final zones = sample['cpuThermalZones'];
 
       if (zones is Map) {
         thermalZoneNames.addAll(
@@ -488,8 +429,7 @@ class AppState extends ChangeNotifier {
       }
     }
 
-    final sortedThermalZoneNames =
-        thermalZoneNames.toList()..sort();
+    final sortedThermalZoneNames = thermalZoneNames.toList()..sort();
 
     buffer.writeln([
       'timestamp',
@@ -507,14 +447,12 @@ class AppState extends ChangeNotifier {
       'droppedFrames',
     ].join(','));
 
-    for (final sample
-        in _sustainedSampleHistory) {
-      final zones =
-          sample['cpuThermalZones'] is Map
-              ? Map<String, dynamic>.from(
-                  sample['cpuThermalZones'] as Map,
-                )
-              : <String, dynamic>{};
+    for (final sample in _sustainedSampleHistory) {
+      final zones = sample['cpuThermalZones'] is Map
+          ? Map<String, dynamic>.from(
+              sample['cpuThermalZones'] as Map,
+            )
+          : <String, dynamic>{};
 
       buffer.writeln([
         sample['timestamp'] ?? '',
@@ -546,49 +484,28 @@ class AppState extends ChangeNotifier {
 
     final output = {
       'test': {
-        'name':
-            'HSV2 Lite Sustained Test',
-        'camera':
-            'Intel RealSense D455',
-        'durationSeconds':
-            _sustainedTestDuration.inSeconds,
-        'sampleIntervalSeconds':
-            _sustainedSampleInterval.inSeconds,
-        'sampleCount':
-            _sustainedSampleHistory.length,
-        'startTime':
-            _sustainedTestStartedAt
-                ?.toIso8601String(),
-        'status':
-            isSustainedTestRunning
-                ? 'RUNNING'
-                : 'STOPPED',
+        'name': 'HSV2 Lite Sustained Test',
+        'camera': 'Intel RealSense D455',
+        'durationSeconds': _sustainedTestDuration.inSeconds,
+        'sampleIntervalSeconds': _sustainedSampleInterval.inSeconds,
+        'sampleCount': _sustainedSampleHistory.length,
+        'startTime': _sustainedTestStartedAt?.toIso8601String(),
+        'status': isSustainedTestRunning ? 'RUNNING' : 'STOPPED',
       },
-
       'summary': {
-        'averageFps':
-            sustainedAverageFps,
-        'minimumFps':
-            sustainedMinFps,
-        'maximumCpuTemperature':
-            sustainedMaxTemperature,
-        'batteryStart':
-            _sustainedStartBattery,
-        'batteryCurrent':
-            telemetry.batteryLevel,
-        'batteryDrain':
-            sustainedBatteryDrain,
-        'sampleCount':
-            _sustainedSampleHistory.length,
+        'averageFps': sustainedAverageFps,
+        'minimumFps': sustainedMinFps,
+        'maximumCpuTemperature': sustainedMaxTemperature,
+        'batteryStart': _sustainedStartBattery,
+        'batteryCurrent': telemetry.batteryLevel,
+        'batteryDrain': sustainedBatteryDrain,
+        'sampleCount': _sustainedSampleHistory.length,
       },
-
-      'samples':
-          _sustainedSampleHistory,
+      'samples': _sustainedSampleHistory,
     };
 
     await file.writeAsString(
-      const JsonEncoder.withIndent('  ')
-          .convert(output),
+      const JsonEncoder.withIndent('  ').convert(output),
     );
   }
 
@@ -608,20 +525,15 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> stopSustainedTest() async {
-    final completedSamples =
-        _sustainedSamples;
+    final completedSamples = _sustainedSamples;
 
-    final completedAvgFps =
-        sustainedAverageFps;
+    final completedAvgFps = sustainedAverageFps;
 
-    final completedMinFps =
-        sustainedMinFps;
+    final completedMinFps = sustainedMinFps;
 
-    final completedMaxThermal =
-        sustainedMaxTemperature;
+    final completedMaxThermal = sustainedMaxTemperature;
 
-    final completedBatteryDrain =
-        sustainedBatteryDrain;
+    final completedBatteryDrain = sustainedBatteryDrain;
 
     // Final save BEFORE clearing the running-test state.
     await _saveSustainedTestData();
@@ -636,8 +548,7 @@ class AppState extends ChangeNotifier {
 
     // Reset live UI summary.
     // Keep history and files for the completed run.
-    _sustainedMinFps =
-        double.infinity;
+    _sustainedMinFps = double.infinity;
 
     _sustainedFpsSum = 0.0;
     _sustainedFpsSamples = 0;
@@ -853,18 +764,17 @@ class AppState extends ChangeNotifier {
     }
   }
 
-Future<void> runReplayBenchmark() async {
-  try {
-    final result = await _commandChannel.invokeMethod(
-      'runReplayBenchmark',
-    );
+  Future<void> runReplayBenchmark() async {
+    try {
+      final result = await _commandChannel.invokeMethod(
+        'runReplayBenchmark',
+      );
 
-    debugPrint('Replay benchmark result: $result');
-  } catch (e) {
-    debugPrint('Replay benchmark error: $e');
+      debugPrint('Replay benchmark result: $result');
+    } catch (e) {
+      debugPrint('Replay benchmark error: $e');
+    }
   }
-}
-
 
   Future<void> stopFixedRecording() async {
     if (kIsWeb) {
@@ -1141,6 +1051,39 @@ Future<void> runReplayBenchmark() async {
           centerDistanceMeters:
               (data['centerDistance'] as num?)?.toDouble() ?? 0.0,
           droppedFrames: (data['droppedFrames'] as num?)?.toInt() ?? 0,
+
+          // Live D455 IMU telemetry
+          gyroX: ((data['imu'] as Map?)?['gyro'] as List?)?.isNotEmpty == true
+              ? (((data['imu'] as Map)['gyro'] as List)[0] as num).toDouble()
+              : 0.0,
+          gyroY: (((data['imu'] as Map?)?['gyro'] as List?)?.length ?? 0) >= 2
+              ? (((data['imu'] as Map)['gyro'] as List)[1] as num).toDouble()
+              : 0.0,
+          gyroZ: (((data['imu'] as Map?)?['gyro'] as List?)?.length ?? 0) >= 3
+              ? (((data['imu'] as Map)['gyro'] as List)[2] as num).toDouble()
+              : 0.0,
+
+          accelX: ((data['imu'] as Map?)?['accel'] as List?)?.isNotEmpty == true
+              ? (((data['imu'] as Map)['accel'] as List)[0] as num).toDouble()
+              : 0.0,
+          accelY: (((data['imu'] as Map?)?['accel'] as List?)?.length ?? 0) >= 2
+              ? (((data['imu'] as Map)['accel'] as List)[1] as num).toDouble()
+              : 0.0,
+          accelZ: (((data['imu'] as Map?)?['accel'] as List?)?.length ?? 0) >= 3
+              ? (((data['imu'] as Map)['accel'] as List)[2] as num).toDouble()
+              : 0.0,
+
+          gyroTimestampMs:
+              ((data['imu'] as Map?)?['gyroTimestampMs'] as num?)?.toDouble() ??
+                  0.0,
+          accelTimestampMs: ((data['imu'] as Map?)?['accelTimestampMs'] as num?)
+                  ?.toDouble() ??
+              0.0,
+
+          gyroCount:
+              ((data['imu'] as Map?)?['gyroCount'] as num?)?.toInt() ?? 0,
+          accelCount:
+              ((data['imu'] as Map?)?['accelCount'] as num?)?.toInt() ?? 0,
         );
 
         // CPU thermal zones from the Android/Linux thermal framework.
